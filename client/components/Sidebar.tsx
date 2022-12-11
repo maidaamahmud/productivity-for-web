@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import {
   HomeOutlined,
   FolderOpenOutlined,
@@ -7,6 +7,7 @@ import {
 } from "@ant-design/icons";
 import type { MenuProps } from "antd";
 import { Layout, Menu } from "antd";
+import { useRouter } from "next/router";
 
 const { Sider } = Layout;
 
@@ -27,20 +28,22 @@ function getItem(
 }
 
 const items: MenuItem[] = [
-  getItem("Home", "1", <HomeOutlined />),
-  getItem("Projects", "2", <FolderOpenOutlined />),
-  getItem("Progress", "3", <ProjectOutlined />),
-  getItem("Timeline", "4", <BoxPlotOutlined />),
+  getItem("Home", "/", <HomeOutlined />),
+  getItem("Projects", "/projects", <FolderOpenOutlined />),
+  getItem("Progress", "/progress", <ProjectOutlined />),
+  getItem("Timeline", "/timeline", <BoxPlotOutlined />),
 ];
 
 const Sidebar: React.FC = () => {
   const [collapsed, setCollapsed] = useState(false);
+  const router = useRouter();
+
   return (
     <Sider
       collapsible
       collapsed={collapsed}
       onCollapse={(value) => setCollapsed(value)}
-      breakpoint="md"
+      breakpoint="sm"
     >
       <div
         style={{
@@ -55,6 +58,9 @@ const Sidebar: React.FC = () => {
         theme="dark"
         defaultSelectedKeys={["1"]}
         mode="inline"
+        onClick={({ key }) => {
+          router.push(key);
+        }}
         items={items}
       />
     </Sider>
