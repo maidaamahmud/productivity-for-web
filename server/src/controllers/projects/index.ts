@@ -1,6 +1,6 @@
 import { Response, Request } from "express";
-import { IProject } from "./../../types/project";
-import Project from "../../models/project";
+import { IProject, ITask } from "./../../types/project";
+import { Project, Task } from "../../models/project";
 
 const getProjects = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -14,20 +14,33 @@ const getProjects = async (req: Request, res: Response): Promise<void> => {
 const addProject = async (req: Request, res: Response): Promise<void> => {
   try {
     const body = req.body;
+
+    const tasksArray: ITask[] = [];
+    for (var i in body.tasks) {
+      const taskObject = body.tasks[i];
+      if (taskObject.description) {
+        const newTask: ITask = new Task({
+          description: taskObject.description,
+          ranking: taskObject.ranking || 1,
+          lists: [],
+          status: false,
+        });
+        tasksArray.push(newTask);
+      }
+    }
+
     const project: IProject = new Project({
-      name: body.name,
-      startDate: body.startDate,
+      name: body.name || "Unnamed Project",
+      startDate: body.startDate, //FIXME: find default for these or make it non required
       endDate: body.endDate,
-      tasks: body.tasks,
+      tasks: tasksArray,
     });
 
     const newProject: IProject = await project.save();
-    const allProject: IProject[] = await Project.find();
 
     res.status(201).json({
       message: "Project added",
       project: newProject,
-      projects: allProject,
     });
   } catch (error) {
     throw error;

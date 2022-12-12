@@ -5,6 +5,7 @@ import { IProject } from "../type";
 import { useState } from "react";
 import NewProjectModal from "../components/NewProjectModal";
 import { Button } from "antd";
+import { addProject } from "./api";
 
 export const getStaticProps: GetStaticProps = async () => {
   const BASE_URL: string = "http://127.0.0.1:4000";
@@ -27,8 +28,9 @@ export default function Projects({ projects }: Props) {
     setOpenModal(false);
   };
 
-  const onCreateProject = (values: any) => {
+  const onCreateProject = (values: Omit<IProject, "_id">) => {
     console.log("Received values of form: ", values);
+    addProject(values);
     setOpenModal(false);
   };
 

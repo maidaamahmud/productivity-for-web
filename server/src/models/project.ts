@@ -1,4 +1,4 @@
-import { IProject } from "./../types/project";
+import { IProject, ITask } from "./../types/project";
 import { model, Schema } from "mongoose";
 
 const taskSchema: Schema = new Schema(
@@ -41,12 +41,15 @@ const projectSchema: Schema = new Schema(
       type: Date,
       required: true,
     },
-    tasks: {
-      type: taskSchema,
-      required: false,
-    },
+    tasks: [
+      {
+        type: taskSchema,
+        required: false,
+      },
+    ],
   },
   { timestamps: true }
 );
 
-export default model<IProject>("Project", projectSchema);
+export const Project = model<IProject>("Project", projectSchema);
+export const Task = model<ITask>("student", taskSchema);
