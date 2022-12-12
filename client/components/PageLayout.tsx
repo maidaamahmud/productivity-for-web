@@ -5,7 +5,7 @@ import { Layout } from "antd";
 const { Content } = Layout;
 
 interface Props {
-  children: String;
+  children: any; //FIXME: ADD TYPE
 }
 const PageLayout = ({ children }: Props) => {
   return (

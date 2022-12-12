@@ -1,12 +1,11 @@
 import PageLayout from "../components/PageLayout";
 import axios, { AxiosResponse } from "axios";
 import { GetStaticProps } from "next";
-import { IProject } from "../type";
+import { ApiDataType, IProject } from "../type";
 
 export const getStaticProps: GetStaticProps = async () => {
   const BASE_URL: string = "http://127.0.0.1:4000";
-  const results = await axios.get(BASE_URL + "/projects");
-
+  const results = await axios.get(BASE_URL + "/projects"); //FIXME: move to api?
   return {
     props: {
       projects: results.data.projects,
@@ -19,7 +18,11 @@ interface Props {
 }
 export default function Projects({ projects }: Props) {
   {
-    projects ? console.log("empty") : console.log("smth inhere");
+    console.log("projects", projects);
   }
-  return <PageLayout> Projects </PageLayout>;
+  return (
+    <PageLayout>
+      <div> plus </div>
+    </PageLayout>
+  );
 }
