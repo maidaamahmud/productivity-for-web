@@ -12,7 +12,10 @@ const PageLayout = ({ children }: Props) => {
     <Layout style={{ minHeight: "100vh" }}>
       <Sidebar />
       <Layout>
-        <Content style={{ margin: "0 16px" }}> {children} </Content>
+        <Content style={{ margin: "0 16px", marginTop: "30px" }}>
+          {" "}
+          {children}{" "}
+        </Content>
       </Layout>
     </Layout>
   );
