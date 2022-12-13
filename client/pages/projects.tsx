@@ -1,28 +1,25 @@
 import PageLayout from "../components/PageLayout";
 import axios, { AxiosResponse } from "axios";
 import { GetStaticProps } from "next";
+import { useRouter } from "next/router";
 import { IProject } from "../type";
 import { useState } from "react";
 import NewProjectModal from "../components/NewProjectModal";
-import { Button, message } from "antd";
+import { Button, message, Card, List } from "antd";
 import { addProject } from "./api";
 
-export const getStaticProps: GetStaticProps = async () => {
-  const BASE_URL: string = "http://127.0.0.1:4000";
-  const results = await axios.get(BASE_URL + "/projects"); //FIXME: move to api?
-  return {
-    props: {
-      projects: results.data.projects,
-    },
-  };
-};
-
 interface Props {
-  projects: IProject;
+  projects: IProject[];
 }
 
 export default function Projects({ projects }: Props) {
   const [openModal, setOpenModal] = useState(false);
+
+  const router = useRouter();
+
+  const refreshData = () => {
+    router.replace(router.asPath);
+  };
 
   const onCancelModal = (e: React.MouseEvent<HTMLElement>) => {
     setOpenModal(false);
@@ -36,6 +33,7 @@ export default function Projects({ projects }: Props) {
         `${res.data.project?.name} has successfully been created!`,
         3
       );
+      refreshData();
     } catch (error: any) {
       message.error("There seems to have been an issue, please try again.", 3);
     } finally {
@@ -47,13 +45,34 @@ export default function Projects({ projects }: Props) {
   return (
     <PageLayout>
       <Button
-        type="primary"
+        size="large"
+        type="default"
         onClick={() => {
           setOpenModal(true);
         }}
+        style={{ marginLeft: "25px", marginBottom: "20px" }}
       >
-        Create New Project
+        Create Project
       </Button>
+      <List
+        grid={{
+          gutter: 5,
+          xs: 1,
+          sm: 1,
+          md: 2,
+          lg: 2,
+          xl: 3,
+          xxl: 4,
+        }}
+        dataSource={projects}
+        renderItem={(project) => (
+          <List.Item>
+            <Card title={project.name} actions={["Edit project"]}>
+              Card content
+            </Card>
+          </List.Item>
+        )}
+      />
       <NewProjectModal
         open={openModal}
         onCreate={onCreateProject}
@@ -62,3 +81,13 @@ export default function Projects({ projects }: Props) {
     </PageLayout>
   );
 }
+
+export const getServerSideProps: GetStaticProps = async () => {
+  const BASE_URL: string = "http://127.0.0.1:4000";
+  const results = await axios.get(BASE_URL + "/projects"); //FIXME: move to api?
+  return {
+    props: {
+      projects: results.data.projects,
+    },
+  };
+};

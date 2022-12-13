@@ -7,7 +7,7 @@ export const addProject = async (
   formData: Omit<IProject, "_id">
 ): Promise<AxiosResponse<ApiDataType>> => {
   const res: AxiosResponse<ApiDataType> = await axios.post(
-    BASE_URL + "/projectt",
+    BASE_URL + "/project",
     formData
   );
   return res;
