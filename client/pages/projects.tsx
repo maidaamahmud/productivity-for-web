@@ -4,7 +4,7 @@ import { GetStaticProps } from "next";
 import { IProject } from "../type";
 import { useState } from "react";
 import NewProjectModal from "../components/NewProjectModal";
-import { Button } from "antd";
+import { Button, message } from "antd";
 import { addProject } from "./api";
 
 export const getStaticProps: GetStaticProps = async () => {
@@ -28,9 +28,19 @@ export default function Projects({ projects }: Props) {
     setOpenModal(false);
   };
 
-  const onCreateProject = (values: Omit<IProject, "_id">) => {
-    console.log("Received values of form: ", values);
-    addProject(values);
+  const onCreateProject = async (values: Omit<IProject, "_id">) => {
+    const hideMessage = message.loading("Loading..", 0);
+    try {
+      const res = await addProject(values);
+      message.success(
+        `${res.data.project?.name} has successfully been created!`,
+        3
+      );
+    } catch (error: any) {
+      message.error("There seems to have been an issue, please try again.", 3);
+    } finally {
+      hideMessage();
+    }
     setOpenModal(false);
   };
 

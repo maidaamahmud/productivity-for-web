@@ -39,7 +39,6 @@ const addProject = async (req: Request, res: Response): Promise<void> => {
     const newProject: IProject = await project.save();
 
     res.status(201).json({
-      message: "Project added",
       project: newProject,
     });
   } catch (error) {
