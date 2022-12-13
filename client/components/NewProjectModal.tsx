@@ -10,18 +10,34 @@ import {
   InputNumber,
 } from "antd";
 import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import moment from "moment";
 import { IProject } from "../type";
 
 interface Props {
   open: boolean;
+  projectToEdit: null | IProject;
   onCreate: (values: IProject) => void;
-  handleCancel: (e: React.MouseEvent<HTMLElement>) => void;
+  handleCancel: () => void;
 }
 
-const NewProjectModal = ({ open, onCreate, handleCancel }: Props) => {
+const NewProjectModal = ({
+  open,
+  projectToEdit,
+  onCreate,
+  handleCancel,
+}: Props) => {
   const [form] = Form.useForm();
-
+  const intialValues = projectToEdit
+    ? {
+        ...projectToEdit,
+        startDate: moment(projectToEdit.startDate),
+        endDate: moment(projectToEdit.endDate),
+      }
+    : {};
+  useEffect(() => {
+    form.setFieldsValue(intialValues);
+  });
   return (
     <>
       <Modal
@@ -38,7 +54,10 @@ const NewProjectModal = ({ open, onCreate, handleCancel }: Props) => {
               console.log("Validate Failed:", info);
             });
         }}
-        onCancel={handleCancel}
+        onCancel={() => {
+          handleCancel();
+          form.resetFields();
+        }}
         width={800}
       >
         <Form
