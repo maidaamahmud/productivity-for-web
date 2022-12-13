@@ -10,14 +10,15 @@ import {
   InputNumber,
 } from "antd";
 import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import moment from "moment";
 import { IProject } from "../type";
 
 interface Props {
   open: boolean;
   projectToEdit: null | IProject;
-  onCreate: (values: IProject) => void;
+  onCreate: (values: Omit<IProject, "_id">) => void;
+  onEdit: (id: String, values: Omit<IProject, "_id">) => void;
   handleCancel: () => void;
 }
 
@@ -25,9 +26,11 @@ const NewProjectModal = ({
   open,
   projectToEdit,
   onCreate,
+  onEdit,
   handleCancel,
 }: Props) => {
   const [form] = Form.useForm();
+
   const intialValues = projectToEdit
     ? {
         ...projectToEdit,
@@ -35,9 +38,11 @@ const NewProjectModal = ({
         endDate: moment(projectToEdit.endDate),
       }
     : {};
+
   useEffect(() => {
     form.setFieldsValue(intialValues);
   });
+
   return (
     <>
       <Modal
@@ -48,7 +53,9 @@ const NewProjectModal = ({
             .validateFields()
             .then((values) => {
               form.resetFields();
-              onCreate(values);
+              projectToEdit
+                ? onEdit(projectToEdit!._id, values)
+                : onCreate(values);
             })
             .catch((info) => {
               console.log("Validate Failed:", info);

@@ -12,7 +12,7 @@ import {
   DeleteOutlined,
   EyeOutlined,
 } from "@ant-design/icons";
-import { addProject } from "./api";
+import { addProject, editProject } from "./api";
 
 const { Text } = Typography;
 
@@ -46,6 +46,48 @@ export default function Projects({ projects }: Props) {
       refreshData();
     } catch (error: any) {
       message.error("There seems to have been an issue, please try again.", 3);
+    } finally {
+      hideMessage();
+    }
+    setOpenModal(false);
+  };
+
+  const onEditProject = async (id: String, values: Omit<IProject, "_id">) => {
+    const hideMessage = message.loading("Loading..", 0);
+    try {
+      const res = await editProject(id, values);
+      console.log("response", res);
+      message.success(
+        `Your changes to ${res.data.project?.name} have been saved!`,
+        3
+      );
+      refreshData();
+    } catch (error: any) {
+      message.error(
+        "We were unable to save your changes, please try again.",
+        3
+      );
+    } finally {
+      hideMessage();
+    }
+    setOpenModal(false);
+  };
+
+  const onDeleteProject = async (id: String, values: Omit<IProject, "_id">) => {
+    const hideMessage = message.loading("Loading..", 0);
+    try {
+      const res = await editProject(id, values);
+      console.log("response", res);
+      message.success(
+        `Your changes to ${res.data.project?.name} have been saved!`,
+        3
+      );
+      refreshData();
+    } catch (error: any) {
+      message.error(
+        "We were unable to save your changes, please try again.",
+        3
+      );
     } finally {
       hideMessage();
     }
@@ -101,7 +143,12 @@ export default function Projects({ projects }: Props) {
                       Edit
                     </Space>
                   </Text>,
-                  <Text key="delete">
+                  <Text
+                    key="delete"
+                    onClick={() => {
+                      onDeleteProject;
+                    }}
+                  >
                     <Space>
                       <DeleteOutlined key="delete" />
                       Delete
@@ -118,6 +165,7 @@ export default function Projects({ projects }: Props) {
           open={openModal}
           projectToEdit={projectToEdit}
           onCreate={onCreateProject}
+          onEdit={onEditProject}
           handleCancel={onCancelModal}
         />
       </div>

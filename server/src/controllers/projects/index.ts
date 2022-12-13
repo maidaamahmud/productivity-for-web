@@ -46,4 +46,22 @@ const addProject = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
-export { getProjects, addProject };
+const updateProject = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const {
+      params: { id },
+      body,
+    } = req;
+    const updatedProject: IProject | null = await Project.findByIdAndUpdate(
+      { _id: id },
+      body
+    );
+    res.status(200).json({
+      project: updatedProject,
+    });
+  } catch (error) {
+    throw error;
+  }
+};
+
+export { getProjects, addProject, updateProject };
