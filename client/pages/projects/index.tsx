@@ -12,7 +12,7 @@ import {
   DeleteOutlined,
   EyeOutlined,
 } from "@ant-design/icons";
-import { addProject, editProject, deleteProject } from "../api";
+import { addProject, updateProject, deleteProject } from "../api";
 
 const { Text } = Typography;
 
@@ -59,7 +59,7 @@ export default function Projects({ projects }: Props) {
     // loading message appears whilst project changed are being saved , once complete user recieves a response message
     const hideMessage = message.loading("Loading..", 0);
     try {
-      const res = await editProject(id, values);
+      const res = await updateProject(id, values);
       message.success(
         `Your changes to ${res.data.project?.name} have been saved!`,
         2

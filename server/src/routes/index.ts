@@ -15,7 +15,7 @@ router.get("/projects/:id", getProject);
 
 router.post("/add-project", addProject);
 
-router.put("/edit-project/:id", updateProject);
+router.put("/update-project/:id", updateProject);
 
 router.delete("/delete-project/:id", deleteProject);
 

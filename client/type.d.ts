@@ -9,6 +9,7 @@ export interface IProject {
 }
 
 interface ITask {
+  _id: string;
   description: string;
   ranking: number;
   status: boolean;

@@ -13,12 +13,12 @@ export const addProject = async (
   return res;
 };
 
-export const editProject = async (
+export const updateProject = async (
   id: String,
   formData: Omit<IProject, "_id">
 ): Promise<AxiosResponse<ApiDataType>> => {
   const res: AxiosResponse<ApiDataType> = await axios.put(
-    BASE_URL + "/edit-project/" + id,
+    BASE_URL + "/update-project/" + id,
     formData
   );
   return res;
