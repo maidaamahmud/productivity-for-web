@@ -2,10 +2,10 @@ import PageLayout from "../../components/PageLayout";
 import axios, { AxiosResponse } from "axios";
 import { GetStaticProps } from "next";
 import { useRouter } from "next/router";
-import { IProject } from "../../type";
+import { IProject, ITask } from "../../type";
 import { useState } from "react";
 import NewProjectModal from "../../components/ProjectModal";
-import { Button, message, Card, List, Typography, Space } from "antd";
+import { Button, message, Card, List, Typography, Space, Progress } from "antd";
 import {
   PlusOutlined,
   EditOutlined,
@@ -93,6 +93,20 @@ export default function Projects({ projects }: Props) {
     }
   };
 
+  const findProjectProgress = (projectTasks: ITask[] | undefined): number => {
+    let progressPercentage = 0;
+    if (projectTasks) {
+      let totalRank = 0;
+      let userRank = 0;
+      projectTasks.forEach((element) => {
+        element.status ? (userRank += element.ranking) : null;
+        totalRank += element.ranking;
+        progressPercentage = Math.round((userRank / totalRank) * 100);
+      });
+    }
+    return progressPercentage;
+  };
+
   return (
     <PageLayout>
       <div>
@@ -125,18 +139,16 @@ export default function Projects({ projects }: Props) {
               <Card
                 title={project.name}
                 actions={[
-                  <Text
+                  <Space
                     key="view"
                     onClick={() => {
                       router.push("/projects/" + project._id);
                     }}
                   >
-                    <Space>
-                      <EyeOutlined />
-                      View
-                    </Space>
-                  </Text>,
-                  <Text
+                    <EyeOutlined />
+                    View
+                  </Space>,
+                  <Space
                     key="edit"
                     onClick={() => {
                       //projectToEdit state is passed to ProjectModal (form used to create and edit project details)
@@ -144,25 +156,29 @@ export default function Projects({ projects }: Props) {
                       setOpenModal(true); // this opens the ProjectModal component
                     }}
                   >
-                    <Space>
-                      <EditOutlined />
-                      Edit
-                    </Space>
-                  </Text>,
-                  <Text
+                    <EditOutlined />
+                    Edit
+                  </Space>,
+                  <Space
                     key="delete"
                     onClick={() => {
                       onDeleteProject(project._id);
                     }}
                   >
-                    <Space>
-                      <DeleteOutlined key="delete" />
-                      Delete
-                    </Space>
-                  </Text>,
+                    <DeleteOutlined key="delete" />
+                    Delete
+                  </Space>,
                 ]}
               >
-                Progress
+                <div style={{ display: "flex", justifyContent: "center" }}>
+                  <Progress
+                    type="circle"
+                    width={80}
+                    strokeColor={{ "0%": "#108ee9", "100%": "#87d068" }}
+                    strokeWidth={8}
+                    percent={findProjectProgress(project.tasks)}
+                  />
+                </div>
               </Card>
             </List.Item>
           )}

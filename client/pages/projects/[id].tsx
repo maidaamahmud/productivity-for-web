@@ -1,5 +1,17 @@
-import { Divider, Button, Space, Table, Typography, message } from "antd";
-import { CheckCircleTwoTone, MinusCircleTwoTone } from "@ant-design/icons";
+import {
+  Divider,
+  Button,
+  Space,
+  Table,
+  Typography,
+  message,
+  ConfigProvider,
+} from "antd";
+import {
+  CheckCircleTwoTone,
+  MinusCircleTwoTone,
+  LeftOutlined,
+} from "@ant-design/icons";
 import axios from "axios";
 import { GetStaticProps } from "next";
 import PageLayout from "../../components/PageLayout";
@@ -11,7 +23,7 @@ interface Props {
   project: IProject; // comes from getServerSideProps (at bottom of page)
 }
 
-export default function ViewProject({ project }: Props) {
+export default function ViewProjectTasks({ project }: Props) {
   const { Text } = Typography;
 
   const completeTasks = project.tasks?.filter((task) => {
@@ -21,36 +33,31 @@ export default function ViewProject({ project }: Props) {
     return !task.status;
   });
 
+  const displayEmptyTable = () => (
+    <div style={{ textAlign: "center" }}>No Tasks</div>
+  );
+
   const refreshData = () => {
     // refetches data (projects)
-    router.replace(router.asPath);
+    router.replace(router.asPath); //FIXME: make global?
   };
 
   const onChangeStatus = async (taskId: String, status: boolean) => {
     if (project && project.tasks) {
       const taskIndex = project.tasks.findIndex((task) => task._id === taskId);
       project.tasks[taskIndex].status = status;
-      console.log(project);
     }
-    const hideMessage = message.loading("Loading..", 0);
     try {
       await updateProject(project._id, project);
-      status
-        ? message.success(`Task has been moved back to todo!`, 2)
-        : message.success(`Task has been marked as completed!`, 2);
       refreshData(); // data refetched once project has been deleted
     } catch (error: any) {
-      message.error(
-        "There was an issue updating the task, please try again",
-        2
-      );
-    } finally {
-      hideMessage();
+      message.error("There was an issue moving the task, please try again", 2);
     }
   };
 
   const columns = [
-    // the object below is all data to determine how both tables are structured (used as a value to the columns attribute in the ant-design table component)
+    // the object below is all data to determine how both tables are structured
+    //(used as a value to the columns attribute in the ant-design table component)
     {
       title: "Task",
       dataIndex: "description",
@@ -89,22 +96,33 @@ export default function ViewProject({ project }: Props) {
 
   return (
     <PageLayout>
-      <Divider orientation="left">Todo</Divider>
-      <Table
-        size="large"
-        dataSource={incompleteTasks}
-        columns={columns}
-        pagination={false}
-        style={{ marginBottom: "20px" }}
-      />
-      <Divider orientation="left">Complete</Divider>
-      <Table
-        size="large"
-        dataSource={completeTasks}
-        columns={columns}
-        pagination={false}
-        style={{ marginBottom: "20px" }}
-      />
+      <Space
+        style={{ color: "black", fontWeight: "600", cursor: "pointer" }}
+        onClick={() => {
+          router.back();
+        }}
+      >
+        <LeftOutlined />
+        Projects
+      </Space>
+      <ConfigProvider renderEmpty={displayEmptyTable}>
+        <h2 style={{ fontSize: "17px", color: "black" }}>Todo</h2>
+        <Table
+          size="large"
+          dataSource={incompleteTasks}
+          columns={columns}
+          pagination={false}
+          style={{ marginBottom: "40px" }}
+        />
+        <h2 style={{ fontSize: "17px", color: "black" }}>Completed</h2>
+        <Table
+          size="large"
+          dataSource={completeTasks}
+          columns={columns}
+          pagination={false}
+          style={{ marginBottom: "20px" }}
+        />
+      </ConfigProvider>
     </PageLayout>
   );
 }
