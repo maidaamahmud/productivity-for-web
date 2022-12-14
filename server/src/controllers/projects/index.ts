@@ -11,6 +11,19 @@ const getProjects = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
+const getProject = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const selectedProject: IProject | null = await Project.findById(
+      req.params.id
+    );
+    res.status(200).json({
+      project: selectedProject,
+    });
+  } catch (error) {
+    throw error;
+  }
+};
+
 const addProject = async (req: Request, res: Response): Promise<void> => {
   try {
     const body = req.body;
@@ -77,4 +90,4 @@ const deleteProject = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
-export { getProjects, addProject, updateProject, deleteProject };
+export { getProjects, getProject, addProject, updateProject, deleteProject };

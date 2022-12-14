@@ -1,10 +1,10 @@
-import PageLayout from "../components/PageLayout";
+import PageLayout from "../../components/PageLayout";
 import axios, { AxiosResponse } from "axios";
 import { GetStaticProps } from "next";
 import { useRouter } from "next/router";
-import { IProject } from "../type";
+import { IProject } from "../../type";
 import { useState } from "react";
-import NewProjectModal from "../components/ProjectModal";
+import NewProjectModal from "../../components/ProjectModal";
 import { Button, message, Card, List, Typography, Space } from "antd";
 import {
   PlusOutlined,
@@ -12,7 +12,7 @@ import {
   DeleteOutlined,
   EyeOutlined,
 } from "@ant-design/icons";
-import { addProject, editProject, deleteProject } from "./api";
+import { addProject, editProject, deleteProject } from "../api";
 
 const { Text } = Typography;
 
@@ -125,7 +125,12 @@ export default function Projects({ projects }: Props) {
               <Card
                 title={project.name}
                 actions={[
-                  <Text key="view">
+                  <Text
+                    key="view"
+                    onClick={() => {
+                      router.push("/projects/" + project._id);
+                    }}
+                  >
                     <Space>
                       <EyeOutlined />
                       View

@@ -1,6 +1,7 @@
 import { Router } from "express";
 import {
   getProjects,
+  getProject,
   addProject,
   updateProject,
   deleteProject,
@@ -9,6 +10,8 @@ import {
 const router: Router = Router();
 
 router.get("/projects", getProjects);
+
+router.get("/projects/:id", getProject);
 
 router.post("/add-project", addProject);
 
