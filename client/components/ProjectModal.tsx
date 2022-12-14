@@ -1,17 +1,6 @@
-import {
-  Button,
-  Modal,
-  Form,
-  Input,
-  Space,
-  DatePicker,
-  Row,
-  Col,
-  InputNumber,
-} from "antd";
+import { Button, Modal, Form, Input, Space, InputNumber } from "antd";
 import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
 import React, { useEffect } from "react";
-import moment from "moment";
 import { IProject } from "../type";
 
 interface Props {
@@ -33,13 +22,7 @@ const NewProjectModal = ({
 
   useEffect(() => {
     // If this form is being used to edit an existing project, the form is filled with the existing values
-    const intialValues = projectToEdit
-      ? {
-          ...projectToEdit,
-          startDate: moment(projectToEdit.startDate),
-          endDate: moment(projectToEdit.endDate),
-        }
-      : {};
+    const intialValues = projectToEdit ? projectToEdit : {};
     form.setFieldsValue(intialValues);
   }, [projectToEdit, form]);
 
@@ -81,36 +64,6 @@ const NewProjectModal = ({
           >
             <Input />
           </Form.Item>
-          <Row>
-            <Col span={10}>
-              <Form.Item
-                label="Project start date"
-                rules={[
-                  {
-                    required: true,
-                    message: "Select the date you want to start",
-                  },
-                ]}
-                name="startDate"
-              >
-                <DatePicker />
-              </Form.Item>
-            </Col>
-            <Col span={10}>
-              <Form.Item
-                label="Project deadline"
-                rules={[
-                  {
-                    required: true,
-                    message: "Select the date you want to finish by",
-                  },
-                ]}
-                name="endDate"
-              >
-                <DatePicker />
-              </Form.Item>
-            </Col>
-          </Row>
           <div
             style={{
               background: "#f5f5f5",

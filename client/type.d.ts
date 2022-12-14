@@ -1,8 +1,6 @@
 export interface IProject {
   _id: string;
   name: string;
-  startDate: Date;
-  endDate: Date;
   tasks?: ITask[];
   createdAt?: string;
   updatedAt?: string;

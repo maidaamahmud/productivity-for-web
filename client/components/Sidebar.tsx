@@ -3,7 +3,6 @@ import {
   HomeOutlined,
   FolderOpenOutlined,
   ProjectOutlined,
-  BoxPlotOutlined,
 } from "@ant-design/icons";
 import type { MenuProps } from "antd";
 import { Layout, Menu } from "antd";
@@ -31,7 +30,6 @@ const items: MenuItem[] = [
   getItem("Home", "/", <HomeOutlined />),
   getItem("Projects", "/projects", <FolderOpenOutlined />),
   getItem("Progress", "/progress", <ProjectOutlined />),
-  getItem("Timeline", "/timeline", <BoxPlotOutlined />),
 ];
 
 const Sidebar: React.FC = () => {

@@ -31,16 +31,6 @@ const projectSchema: Schema = new Schema(
       type: String,
       required: true,
     },
-
-    startDate: {
-      type: Date,
-      required: true,
-    },
-
-    endDate: {
-      type: Date,
-      required: true,
-    },
     tasks: [
       {
         type: taskSchema,

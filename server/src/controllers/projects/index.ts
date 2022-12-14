@@ -44,8 +44,6 @@ const addProject = async (req: Request, res: Response): Promise<void> => {
 
     const project: IProject = new Project({
       name: body.name || "Unnamed Project",
-      startDate: body.startDate, //FIXME: find default for these or make it non required
-      endDate: body.endDate,
       tasks: tasksArray,
     });
 
