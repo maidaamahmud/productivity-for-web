@@ -31,36 +31,37 @@ const NewProjectModal = ({
 }: Props) => {
   const [form] = Form.useForm();
 
-  const intialValues = projectToEdit
-    ? {
-        ...projectToEdit,
-        startDate: moment(projectToEdit.startDate),
-        endDate: moment(projectToEdit.endDate),
-      }
-    : {};
-
   useEffect(() => {
+    // If this form is being used to edit an existing project, the form is filled with the existing values
+    const intialValues = projectToEdit
+      ? {
+          ...projectToEdit,
+          startDate: moment(projectToEdit.startDate),
+          endDate: moment(projectToEdit.endDate),
+        }
+      : {};
     form.setFieldsValue(intialValues);
-  });
+  }, [projectToEdit, form]);
+
+  const onSubmitForm = () => {
+    form
+      .validateFields()
+      .then((values) => {
+        form.resetFields();
+        // function run depending on if an existing project is being edited or a new one is being created (resulting function calls api to edit or create)
+        projectToEdit ? onEdit(projectToEdit!._id, values) : onCreate(values);
+      })
+      .catch((info) => {
+        console.log("Validate Failed:", info);
+      });
+  };
 
   return (
     <>
       <Modal
-        title="Create new project"
+        title={projectToEdit ? "Edit project" : "Create new project"}
         open={open}
-        onOk={() => {
-          form
-            .validateFields()
-            .then((values) => {
-              form.resetFields();
-              projectToEdit
-                ? onEdit(projectToEdit!._id, values)
-                : onCreate(values);
-            })
-            .catch((info) => {
-              console.log("Validate Failed:", info);
-            });
-        }}
+        onOk={onSubmitForm}
         onCancel={() => {
           handleCancel();
           form.resetFields();

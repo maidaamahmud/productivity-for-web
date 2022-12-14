@@ -59,6 +59,7 @@ const Sidebar: React.FC = () => {
         defaultSelectedKeys={["1"]}
         mode="inline"
         onClick={({ key }) => {
+          // directs user to correct path (which is stored under key for each item object within the items array)
           router.push(key);
         }}
         items={items}

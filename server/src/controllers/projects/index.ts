@@ -64,4 +64,17 @@ const updateProject = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
-export { getProjects, addProject, updateProject };
+const deleteProject = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const deletedProject: IProject | null = await Project.findByIdAndRemove(
+      req.params.id
+    );
+    res.status(200).json({
+      project: deletedProject,
+    });
+  } catch (error) {
+    throw error;
+  }
+};
+
+export { getProjects, addProject, updateProject, deleteProject };

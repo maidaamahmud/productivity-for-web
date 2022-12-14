@@ -4,7 +4,7 @@ import { GetStaticProps } from "next";
 import { useRouter } from "next/router";
 import { IProject } from "../type";
 import { useState } from "react";
-import NewProjectModal from "../components/NewProjectModal";
+import NewProjectModal from "../components/ProjectModal";
 import { Button, message, Card, List, Typography, Space } from "antd";
 import {
   PlusOutlined,
@@ -12,12 +12,12 @@ import {
   DeleteOutlined,
   EyeOutlined,
 } from "@ant-design/icons";
-import { addProject, editProject } from "./api";
+import { addProject, editProject, deleteProject } from "./api";
 
 const { Text } = Typography;
 
 interface Props {
-  projects: IProject[];
+  projects: IProject[]; // comes from getServerSideProps (at bottom of page)
 }
 
 export default function Projects({ projects }: Props) {
@@ -27,25 +27,28 @@ export default function Projects({ projects }: Props) {
   const router = useRouter();
 
   const refreshData = () => {
+    // refetches data (projects)
     router.replace(router.asPath);
   };
 
   const onCancelModal = () => {
+    // when modal is closed
     setOpenModal(false);
     setProjectToEdit(null);
   };
 
   const onCreateProject = async (values: Omit<IProject, "_id">) => {
+    // loading message appears whilst project is being created, once complete user recieves a response message
     const hideMessage = message.loading("Loading..", 0);
     try {
       const res = await addProject(values);
       message.success(
         `${res.data.project?.name} has successfully been created!`,
-        3
+        2
       );
-      refreshData();
+      refreshData(); // data refetched once new project added to database
     } catch (error: any) {
-      message.error("There seems to have been an issue, please try again.", 3);
+      message.error("There seems to have been an issue, please try again.", 2);
     } finally {
       hideMessage();
     }
@@ -53,19 +56,19 @@ export default function Projects({ projects }: Props) {
   };
 
   const onEditProject = async (id: String, values: Omit<IProject, "_id">) => {
+    // loading message appears whilst project changed are being saved , once complete user recieves a response message
     const hideMessage = message.loading("Loading..", 0);
     try {
       const res = await editProject(id, values);
-      console.log("response", res);
       message.success(
         `Your changes to ${res.data.project?.name} have been saved!`,
-        3
+        2
       );
-      refreshData();
+      refreshData(); // data refetched once existing project has been altered
     } catch (error: any) {
       message.error(
         "We were unable to save your changes, please try again.",
-        3
+        2
       );
     } finally {
       hideMessage();
@@ -73,25 +76,21 @@ export default function Projects({ projects }: Props) {
     setOpenModal(false);
   };
 
-  const onDeleteProject = async (id: String, values: Omit<IProject, "_id">) => {
+  const onDeleteProject = async (id: String) => {
+    // loading message appears whilst project is being deleted , once complete user recieves a response message
     const hideMessage = message.loading("Loading..", 0);
     try {
-      const res = await editProject(id, values);
-      console.log("response", res);
-      message.success(
-        `Your changes to ${res.data.project?.name} have been saved!`,
-        3
-      );
-      refreshData();
+      const res = await deleteProject(id);
+      message.success(`${res.data.project?.name} has been deleted!`, 2);
+      refreshData(); // data refetched once project has been deleted
     } catch (error: any) {
       message.error(
-        "We were unable to save your changes, please try again.",
-        3
+        "We were unable to delete this project, please try again.",
+        2
       );
     } finally {
       hideMessage();
     }
-    setOpenModal(false);
   };
 
   return (
@@ -103,12 +102,13 @@ export default function Projects({ projects }: Props) {
           size="large"
           type="default"
           onClick={() => {
-            setOpenModal(true);
+            setOpenModal(true); // this opens the ProjectModal component
           }}
           style={{ marginBottom: "35px" }}
         >
           Project
         </Button>
+        {/* grid attribute in List component determines how many boxes (Card components) should appear in a row depending on the screen size*/}
         <List
           grid={{
             gutter: 5,
@@ -134,8 +134,9 @@ export default function Projects({ projects }: Props) {
                   <Text
                     key="edit"
                     onClick={() => {
+                      //projectToEdit state is passed to ProjectModal (form used to create and edit project details)
                       setProjectToEdit(project);
-                      setOpenModal(true);
+                      setOpenModal(true); // this opens the ProjectModal component
                     }}
                   >
                     <Space>
@@ -146,7 +147,7 @@ export default function Projects({ projects }: Props) {
                   <Text
                     key="delete"
                     onClick={() => {
-                      onDeleteProject;
+                      onDeleteProject(project._id);
                     }}
                   >
                     <Space>
@@ -163,7 +164,7 @@ export default function Projects({ projects }: Props) {
         />
         <NewProjectModal
           open={openModal}
-          projectToEdit={projectToEdit}
+          projectToEdit={projectToEdit} // if projectToEdit is null if new project is being created or it is set to the project object to be edited
           onCreate={onCreateProject}
           onEdit={onEditProject}
           handleCancel={onCancelModal}
@@ -174,6 +175,7 @@ export default function Projects({ projects }: Props) {
 }
 
 export const getServerSideProps: GetStaticProps = async () => {
+  // fetches projects, and returns them within props under the name projects
   const BASE_URL: string = "http://127.0.0.1:4000";
   const results = await axios.get(BASE_URL + "/projects"); //FIXME: move to api?
   return {
