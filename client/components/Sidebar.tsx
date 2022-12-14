@@ -38,6 +38,7 @@ const Sidebar: React.FC = () => {
 
   return (
     <Sider
+      theme="light"
       collapsible
       collapsed={collapsed}
       onCollapse={(value) => setCollapsed(value)}
@@ -53,8 +54,8 @@ const Sidebar: React.FC = () => {
       />
 
       <Menu
-        theme="dark"
-        defaultSelectedKeys={["1"]}
+        theme="light"
+        defaultSelectedKeys={[router.pathname]}
         mode="inline"
         onClick={({ key }) => {
           // directs user to correct path (which is stored under key for each item object within the items array)
