@@ -3,6 +3,8 @@ import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
 import React, { useEffect } from "react";
 import { IProject } from "../type";
 
+const { TextArea } = Input;
+
 interface Props {
   open: boolean;
   projectToEdit: null | IProject;
@@ -22,6 +24,7 @@ const NewProjectModal = ({
 
   useEffect(() => {
     // If this form is being used to edit an existing project, the form is filled with the existing values
+    form.resetFields();
     const intialValues = projectToEdit ? projectToEdit : {};
     form.setFieldsValue(intialValues);
   }, [projectToEdit, form]);
@@ -30,9 +33,9 @@ const NewProjectModal = ({
     form
       .validateFields()
       .then((values) => {
-        form.resetFields();
         // function run depending on if an existing project is being edited or a new one is being created (resulting function calls api to edit or create)
         projectToEdit ? onEdit(projectToEdit!._id, values) : onCreate(values);
+        form.resetFields();
       })
       .catch((info) => {
         console.log("Validate Failed:", info);
@@ -101,7 +104,7 @@ const NewProjectModal = ({
                           },
                         ]}
                       >
-                        <Input />
+                        <TextArea />
                       </Form.Item>
                       <Form.Item
                         {...restField}

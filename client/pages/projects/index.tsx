@@ -4,17 +4,10 @@ import { GetStaticProps } from "next";
 import { useRouter } from "next/router";
 import { IProject, ITask } from "../../type";
 import { useState } from "react";
-import NewProjectModal from "../../components/ProjectModal";
-import { Button, message, Card, List, Typography, Space, Progress } from "antd";
-import {
-  PlusOutlined,
-  EditOutlined,
-  DeleteOutlined,
-  EyeOutlined,
-} from "@ant-design/icons";
+import ProjectModal from "../../components/ProjectModal";
+import { Button, message, Card, List, Space, Progress } from "antd";
+import { EditOutlined, DeleteOutlined, EyeOutlined } from "@ant-design/icons";
 import { addProject, updateProject, deleteProject } from "../api";
-
-const { Text } = Typography;
 
 interface Props {
   projects: IProject[]; // comes from getServerSideProps (at bottom of page)
@@ -93,14 +86,14 @@ export default function Projects({ projects }: Props) {
     }
   };
 
-  const findProjectProgress = (projectTasks: ITask[] | undefined): number => {
+  const findProjectProgress = (projectTasks?: ITask[]): number => {
     let progressPercentage = 0;
     if (projectTasks) {
       let totalRank = 0;
       let userRank = 0;
-      projectTasks.forEach((element) => {
-        element.status ? (userRank += element.ranking) : null;
-        totalRank += element.ranking;
+      projectTasks.forEach((task) => {
+        task.status ? (userRank += task.ranking) : null;
+        totalRank += task.ranking;
         progressPercentage = Math.round((userRank / totalRank) * 100);
       });
     }
@@ -111,16 +104,19 @@ export default function Projects({ projects }: Props) {
     <PageLayout>
       <div>
         <Button
-          icon={<PlusOutlined />}
-          shape="round"
           size="large"
           type="default"
           onClick={() => {
             setOpenModal(true); // this opens the ProjectModal component
           }}
-          style={{ marginBottom: "35px" }}
+          style={{
+            marginBottom: "35px",
+            backgroundColor: "#108ee9",
+            color: "white",
+            border: "none",
+          }}
         >
-          Project
+          New Project
         </Button>
         {/* grid attribute in List component determines how many boxes (Card components) should appear in a row depending on the screen size*/}
         <List
@@ -173,7 +169,7 @@ export default function Projects({ projects }: Props) {
                 <div style={{ display: "flex", justifyContent: "center" }}>
                   <Progress
                     type="circle"
-                    width={80}
+                    width={70}
                     strokeColor={{ "0%": "#108ee9", "100%": "#87d068" }}
                     strokeWidth={8}
                     percent={findProjectProgress(project.tasks)}
@@ -183,7 +179,7 @@ export default function Projects({ projects }: Props) {
             </List.Item>
           )}
         />
-        <NewProjectModal
+        <ProjectModal
           open={openModal}
           projectToEdit={projectToEdit} // if projectToEdit is null if new project is being created or it is set to the project object to be edited
           onCreate={onCreateProject}
