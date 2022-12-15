@@ -5,6 +5,7 @@ import {
   addProject,
   updateProject,
   deleteProject,
+  addTask,
 } from "../controllers/projects";
 
 const router: Router = Router();
@@ -18,5 +19,7 @@ router.post("/add-project", addProject);
 router.put("/update-project/:id", updateProject);
 
 router.delete("/delete-project/:id", deleteProject);
+
+router.put("/projects/:id/add-task", addTask);
 
 export default router;

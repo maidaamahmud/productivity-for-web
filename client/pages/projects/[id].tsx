@@ -17,7 +17,7 @@ import { GetStaticProps } from "next";
 import PageLayout from "../../components/PageLayout";
 import { IProject, ITask } from "../../type";
 import router from "next/router";
-import { updateProject } from "../api";
+import { addTask, updateProject } from "../api";
 import { useState } from "react";
 import AddTaskModal from "../../components/AddTaskModal";
 
@@ -45,17 +45,31 @@ export default function ViewProjectTasks({ project }: Props) {
     router.replace(router.asPath); //FIXME: make global?
   };
 
-  const onChangeStatus = async (taskId: String, status: boolean) => {
-    if (project && project.tasks) {
-      const taskIndex = project.tasks.findIndex((task) => task._id === taskId);
-      project.tasks[taskIndex].status = status;
-    }
+  // const onChangeStatus = async (taskId: String, status: boolean) => {
+  //   if (project && project.tasks) {
+  //     const taskIndex = project.tasks.findIndex((task) => task._id === taskId);
+  //     project.tasks[taskIndex].status = status;
+  //   }
+  //   try {
+  //     await updateProject(project._id, project);
+  //     refreshData(); // data refetched once project has been deleted
+  //   } catch (error: any) {
+  //     message.error("There was an issue moving the task, please try again", 2);
+  //   }
+  // };
+
+  const onAddTask = async (taskValues: {
+    description: string;
+    ranking: number;
+  }) => {
     try {
-      await updateProject(project._id, project);
+      const res = await addTask(project._id, taskValues);
+      console.log(res.data);
       refreshData(); // data refetched once project has been deleted
     } catch (error: any) {
-      message.error("There was an issue moving the task, please try again", 2);
+      message.error("There was an issue adding the task, please try again", 2);
     }
+    setOpenModal(false);
   };
 
   const onCancelModal = () => {
@@ -63,40 +77,34 @@ export default function ViewProjectTasks({ project }: Props) {
     setOpenModal(false);
   };
 
-  const onAddTask = () => {
-    setOpenModal(false);
-  };
-
   const columns = [
-    // the object below is all data to determine how both tables are structured
-    //(used as a value to the columns attribute in the ant-design table component)
     {
       title: "Task",
       dataIndex: "description",
-      render: (tasks: ITask[], task: ITask) => {
-        return (
-          <Space size={"large"}>
-            {task.status ? (
-              <Text
-                onClick={() => {
-                  onChangeStatus(task._id, false);
-                }}
-              >
-                <MinusCircleTwoTone style={{ fontSize: "20px" }} />
-              </Text>
-            ) : (
-              <CheckCircleTwoTone
-                onClick={() => {
-                  onChangeStatus(task._id, true);
-                }}
-                style={{ fontSize: "20px" }}
-                twoToneColor={"#6dc76d"}
-              />
-            )}
-            {task.description}
-          </Space>
-        );
-      },
+      // render: (tasks: ITask[], task: ITask) => {
+      //   return (
+      //     <Space size={"large"}>
+      //       {task.status ? (
+      //         <Text
+      //           onClick={() => {
+      //             onChangeStatus(task._id, false);
+      //           }}
+      //         >
+      //           <MinusCircleTwoTone style={{ fontSize: "20px" }} />
+      //         </Text>
+      //       ) : (
+      //         <CheckCircleTwoTone
+      //           onClick={() => {
+      //             onChangeStatus(task._id, true);
+      //           }}
+      //           style={{ fontSize: "20px" }}
+      //           twoToneColor={"#6dc76d"}
+      //         />
+      //       )}
+      //       {task.description}
+      //     </Space>
+      //   );
+      // },
       key: "description",
     },
     {

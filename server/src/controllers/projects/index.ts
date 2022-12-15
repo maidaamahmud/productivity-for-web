@@ -75,6 +75,38 @@ const updateProject = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
+const addTask = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const {
+      params: { id },
+      body,
+    } = req;
+
+    const newTask: ITask = new Task({
+      description: body.description,
+      ranking: body.ranking || 1,
+      lists: [],
+      status: false,
+    });
+
+    Project.findOneAndUpdate(
+      { _id: id },
+      { $push: { tasks: newTask } },
+      function (error: any, success: any) {
+        if (error) {
+          console.log("error", error);
+        }
+      }
+    );
+
+    res.status(200).json({
+      task: newTask,
+    });
+  } catch (error) {
+    throw error;
+  }
+};
+
 const deleteProject = async (req: Request, res: Response): Promise<void> => {
   try {
     const deletedProject: IProject | null = await Project.findByIdAndRemove(
@@ -88,4 +120,11 @@ const deleteProject = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
-export { getProjects, getProject, addProject, updateProject, deleteProject };
+export {
+  getProjects,
+  getProject,
+  addProject,
+  updateProject,
+  deleteProject,
+  addTask,
+};

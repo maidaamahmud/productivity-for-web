@@ -32,3 +32,14 @@ export const deleteProject = async (
   );
   return res;
 };
+
+export const addTask = async (
+  id: String,
+  formData: { description: String; ranking: number }
+): Promise<AxiosResponse<ApiDataType>> => {
+  const res: AxiosResponse<ApiDataType> = await axios.put(
+    BASE_URL + "/projects/" + id + "/add-task",
+    formData
+  );
+  return res;
+};
