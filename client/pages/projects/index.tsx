@@ -4,7 +4,7 @@ import { GetStaticProps } from "next";
 import { useRouter } from "next/router";
 import { IProject, ITask } from "../../type";
 import { useState } from "react";
-import ProjectModal from "../../components/ProjectModal";
+import NewProjectModal from "../../components/NewProjectModal";
 import { Button, message, Card, List, Space, Progress } from "antd";
 import { EditOutlined, DeleteOutlined, EyeOutlined } from "@ant-design/icons";
 import { addProject, updateProject, deleteProject } from "../api";
@@ -15,7 +15,6 @@ interface Props {
 
 export default function Projects({ projects }: Props) {
   const [openModal, setOpenModal] = useState<boolean>(false);
-  const [projectToEdit, setProjectToEdit] = useState<IProject | null>(null);
 
   const router = useRouter();
 
@@ -27,7 +26,6 @@ export default function Projects({ projects }: Props) {
   const onCancelModal = () => {
     // when modal is closed
     setOpenModal(false);
-    setProjectToEdit(null);
   };
 
   const onCreateProject = async (values: Omit<IProject, "_id">) => {
@@ -42,27 +40,6 @@ export default function Projects({ projects }: Props) {
       refreshData(); // data refetched once new project added to database
     } catch (error: any) {
       message.error("There seems to have been an issue, please try again.", 2);
-    } finally {
-      hideMessage();
-    }
-    setOpenModal(false);
-  };
-
-  const onEditProject = async (id: String, values: Omit<IProject, "_id">) => {
-    // loading message appears whilst project changed are being saved , once complete user recieves a response message
-    const hideMessage = message.loading("Loading..", 0);
-    try {
-      const res = await updateProject(id, values);
-      message.success(
-        `Your changes to ${res.data.project?.name} have been saved!`,
-        2
-      );
-      refreshData(); // data refetched once existing project has been altered
-    } catch (error: any) {
-      message.error(
-        "We were unable to save your changes, please try again.",
-        2
-      );
     } finally {
       hideMessage();
     }
@@ -145,17 +122,6 @@ export default function Projects({ projects }: Props) {
                     View
                   </Space>,
                   <Space
-                    key="edit"
-                    onClick={() => {
-                      //projectToEdit state is passed to ProjectModal (form used to create and edit project details)
-                      setProjectToEdit(project);
-                      setOpenModal(true); // this opens the ProjectModal component
-                    }}
-                  >
-                    <EditOutlined />
-                    Edit
-                  </Space>,
-                  <Space
                     key="delete"
                     onClick={() => {
                       onDeleteProject(project._id);
@@ -179,11 +145,9 @@ export default function Projects({ projects }: Props) {
             </List.Item>
           )}
         />
-        <ProjectModal
+        <NewProjectModal
           open={openModal}
-          projectToEdit={projectToEdit} // if projectToEdit is null if new project is being created or it is set to the project object to be edited
           onCreate={onCreateProject}
-          onEdit={onEditProject}
           handleCancel={onCancelModal}
         />
       </div>

@@ -7,34 +7,18 @@ const { TextArea } = Input;
 
 interface Props {
   open: boolean;
-  projectToEdit: null | IProject;
   onCreate: (values: Omit<IProject, "_id">) => void;
-  onEdit: (id: String, values: Omit<IProject, "_id">) => void;
   handleCancel: () => void;
 }
 
-const NewProjectModal = ({
-  open,
-  projectToEdit,
-  onCreate,
-  onEdit,
-  handleCancel,
-}: Props) => {
+const NewProjectModal = ({ open, onCreate, handleCancel }: Props) => {
   const [form] = Form.useForm();
-
-  useEffect(() => {
-    // If this form is being used to edit an existing project, the form is filled with the existing values
-    form.resetFields();
-    const intialValues = projectToEdit ? projectToEdit : {};
-    form.setFieldsValue(intialValues);
-  }, [projectToEdit, form]);
 
   const onSubmitForm = () => {
     form
       .validateFields()
       .then((values) => {
-        // function run depending on if an existing project is being edited or a new one is being created (resulting function calls api to edit or create)
-        projectToEdit ? onEdit(projectToEdit!._id, values) : onCreate(values);
+        onCreate(values);
         form.resetFields();
       })
       .catch((info) => {
@@ -45,7 +29,7 @@ const NewProjectModal = ({
   return (
     <>
       <Modal
-        title={projectToEdit ? "Edit project" : "Create new project"}
+        title={"Create new project"}
         open={open}
         onOk={onSubmitForm}
         onCancel={() => {

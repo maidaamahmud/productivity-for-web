@@ -4,11 +4,6 @@ import Head from "next/head";
 import Image from "next/image";
 import { GetStaticProps } from "next/types";
 import { useEffect, useMemo, useState } from "react";
-import {
-  forEachChild,
-  getAllJSDocTagsOfKind,
-  isAsteriskToken,
-} from "typescript";
 import PageLayout from "../components/PageLayout";
 import SprintModal from "../components/SprintModal";
 import styles from "../styles/Home.module.css";

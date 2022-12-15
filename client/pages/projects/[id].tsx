@@ -18,12 +18,15 @@ import PageLayout from "../../components/PageLayout";
 import { IProject, ITask } from "../../type";
 import router from "next/router";
 import { updateProject } from "../api";
+import { useState } from "react";
+import AddTaskModal from "../../components/AddTaskModal";
 
 interface Props {
   project: IProject; // comes from getServerSideProps (at bottom of page)
 }
 
 export default function ViewProjectTasks({ project }: Props) {
+  const [openModal, setOpenModal] = useState<boolean>(false);
   const { Text } = Typography;
 
   const completeTasks = project.tasks?.filter((task) => {
@@ -53,6 +56,15 @@ export default function ViewProjectTasks({ project }: Props) {
     } catch (error: any) {
       message.error("There was an issue moving the task, please try again", 2);
     }
+  };
+
+  const onCancelModal = () => {
+    // when modal is closed
+    setOpenModal(false);
+  };
+
+  const onAddTask = () => {
+    setOpenModal(false);
   };
 
   const columns = [
@@ -105,24 +117,46 @@ export default function ViewProjectTasks({ project }: Props) {
         <LeftOutlined />
         Projects
       </Space>
-      <ConfigProvider renderEmpty={displayEmptyTable}>
-        <h2 style={{ fontSize: "17px", color: "black" }}>Todo</h2>
-        <Table
+      <div>
+        <Button
           size="large"
-          dataSource={incompleteTasks}
-          columns={columns}
-          pagination={false}
-          style={{ marginBottom: "40px" }}
+          type="default"
+          onClick={() => {
+            setOpenModal(true);
+          }}
+          style={{
+            marginBottom: "35px",
+            backgroundColor: "#108ee9",
+            color: "white",
+            border: "none",
+          }}
+        >
+          Add Task
+        </Button>
+        <ConfigProvider renderEmpty={displayEmptyTable}>
+          <h2 style={{ fontSize: "17px", color: "black" }}>Todo</h2>
+          <Table
+            size="large"
+            dataSource={incompleteTasks}
+            columns={columns}
+            pagination={false}
+            style={{ marginBottom: "40px" }}
+          />
+          <h2 style={{ fontSize: "17px", color: "black" }}>Completed</h2>
+          <Table
+            size="large"
+            dataSource={completeTasks}
+            columns={columns}
+            pagination={false}
+            style={{ marginBottom: "20px" }}
+          />
+        </ConfigProvider>
+        <AddTaskModal
+          open={openModal}
+          handleCancel={onCancelModal}
+          onAddTask={onAddTask}
         />
-        <h2 style={{ fontSize: "17px", color: "black" }}>Completed</h2>
-        <Table
-          size="large"
-          dataSource={completeTasks}
-          columns={columns}
-          pagination={false}
-          style={{ marginBottom: "20px" }}
-        />
-      </ConfigProvider>
+      </div>
     </PageLayout>
   );
 }
