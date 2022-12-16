@@ -1,7 +1,8 @@
-import { Button, Modal, Form, Input, Space, InputNumber } from "antd";
-import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
+import { Modal, Form, Input, Button, Space, Tooltip } from "antd";
+import { InfoCircleOutlined } from "@ant-design/icons";
 import React, { useEffect } from "react";
 import { IProject } from "../type";
+import NewProjectForm from "./NewProjectForm";
 
 const { TextArea } = Input;
 
@@ -29,98 +30,47 @@ const NewProjectModal = ({ open, onCreate, handleCancel }: Props) => {
   return (
     <>
       <Modal
-        title={"Create new project"}
+        title={
+          <Space style={{ fontSize: "17px", fontWeight: "500" }}>
+            <Tooltip
+              title={
+                <div>
+                  Split your project into tasks and rank them from <b>1-8</b>{" "}
+                  based on time and difficulty
+                </div>
+              }
+              color={"#108ee9"}
+              key={"#108ee9"}
+            >
+              <InfoCircleOutlined style={{ color: "#108ee9" }} />
+            </Tooltip>
+            Time to plan out your project!
+          </Space>
+        }
         open={open}
-        onOk={onSubmitForm}
         onCancel={() => {
           handleCancel();
           form.resetFields();
         }}
         width={800}
+        footer={null}
       >
-        <Form
-          form={form}
-          name="newProjectForm"
-          autoComplete="off"
-          style={{ paddingTop: "15px" }}
-        >
-          <Form.Item
-            label="Project name"
-            rules={[{ required: true, message: "Give this project a name" }]}
-            name="name"
-          >
-            <Input />
-          </Form.Item>
-          <div
+        <NewProjectForm form={form} />
+        <div style={{ display: " flex", justifyContent: "flex-end" }}>
+          <Button
+            size="large"
             style={{
-              background: "#f5f5f5",
-              padding: "15px",
-              borderRadius: "4px",
+              background: "#108ee9",
+              color: "white",
+              marginTop: "20px",
+              width: "12vh",
+              border: "none",
             }}
+            onClick={onSubmitForm}
           >
-            <div
-              style={{
-                paddingBottom: "15px",
-                fontSize: "15px",
-              }}
-            >
-              Project tasks
-            </div>
-            <Form.List name="tasks">
-              {(fields, { add, remove }) => (
-                <>
-                  {fields.map(({ key, name, ...restField }) => (
-                    <Space
-                      key={key}
-                      style={{ display: "flex", marginBottom: 8 }}
-                      align="baseline"
-                      size={"middle"}
-                    >
-                      <Form.Item
-                        {...restField}
-                        style={{ width: "60vh" }}
-                        name={[name, "description"]}
-                        label="Description"
-                        rules={[
-                          {
-                            required: true,
-                            message: "Don't forget to descibe the task",
-                          },
-                        ]}
-                      >
-                        <TextArea />
-                      </Form.Item>
-                      <Form.Item
-                        {...restField}
-                        label="Ranking"
-                        name={[name, "ranking"]}
-                        rules={[
-                          {
-                            required: true,
-                            message: "This task needs a ranking",
-                          },
-                        ]}
-                      >
-                        <InputNumber min={1} max={8} />
-                      </Form.Item>
-                      <MinusCircleOutlined onClick={() => remove(name)} />
-                    </Space>
-                  ))}
-                  <Form.Item>
-                    <Button
-                      type="dashed"
-                      onClick={() => add()}
-                      block
-                      icon={<PlusOutlined />}
-                    >
-                      Add task
-                    </Button>
-                  </Form.Item>
-                </>
-              )}
-            </Form.List>
-          </div>
-        </Form>
+            Create
+          </Button>
+        </div>
       </Modal>
     </>
   );

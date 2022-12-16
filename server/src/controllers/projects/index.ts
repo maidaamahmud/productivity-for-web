@@ -35,8 +35,8 @@ const addProject = async (req: Request, res: Response): Promise<void> => {
         const newTask: ITask = new Task({
           description: taskObject.description,
           ranking: taskObject.ranking || 1,
-          lists: [],
-          status: false,
+          status: "todo",
+          inSprint: false,
         });
         tasksArray.push(newTask);
       }
@@ -85,8 +85,8 @@ const addTask = async (req: Request, res: Response): Promise<void> => {
     const newTask: ITask = new Task({
       description: body.description,
       ranking: body.ranking || 1,
-      lists: [],
-      status: false,
+      status: "todo",
+      isSprint: false,
     });
 
     Project.findOneAndUpdate(

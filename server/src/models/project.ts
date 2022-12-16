@@ -12,15 +12,13 @@ const taskSchema: Schema = new Schema(
       required: true,
     },
     status: {
+      type: String,
+      required: true,
+    },
+    inSprint: {
       type: Boolean,
       required: true,
     },
-    lists: [
-      {
-        type: String,
-        required: false,
-      },
-    ],
   },
   { timestamps: true }
 );

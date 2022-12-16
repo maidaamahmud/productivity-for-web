@@ -10,8 +10,8 @@ interface ITask {
   _id: string;
   description: string;
   ranking: number;
-  status: boolean;
-  lists: string[];
+  status: string;
+  isSprint: boolean;
 }
 
 interface ProjectProps {

@@ -6,12 +6,10 @@ import {
   Typography,
   message,
   ConfigProvider,
+  Row,
+  Col,
 } from "antd";
-import {
-  CheckCircleTwoTone,
-  MinusCircleTwoTone,
-  LeftOutlined,
-} from "@ant-design/icons";
+import { LeftOutlined } from "@ant-design/icons";
 import axios from "axios";
 import { GetStaticProps } from "next";
 import PageLayout from "../../components/PageLayout";
@@ -21,94 +19,130 @@ import { addTask, updateProject } from "../api";
 import { useState } from "react";
 import AddTaskModal from "../../components/AddTaskModal";
 
+// const onChangeStatus = async (taskId: String, status: boolean) => {
+//   if (project && project.tasks) {
+//     const taskIndex = project.tasks.findIndex((task) => task._id === taskId);
+//     project.tasks[taskIndex].status = status;
+//   }
+//   try {
+//     await updateProject(project._id, project);
+//     refreshData(); // data refetched once project has been deleted
+//   } catch (error: any) {
+//     message.error("There was an issue moving the task, please try again", 2);
+//   }
+// };
+
+// render: (tasks: ITask[], task: ITask) => {
+//   return (
+//     <Space size={"large"}>
+//       {task.status ? (
+//         <Text
+//           onClick={() => {
+//             onChangeStatus(task._id, false);
+//           }}
+//         >
+//           <MinusCircleTwoTone style={{ fontSize: "20px" }} />
+//         </Text>
+//       ) : (
+//         <CheckCircleTwoTone
+//           onClick={() => {
+//             onChangeStatus(task._id, true);
+//           }}
+//           style={{ fontSize: "20px" }}
+//           twoToneColor={"#6dc76d"}
+//         />
+//       )}
+//       {task.description}
+//     </Space>
+//   );
+// },
 interface Props {
   project: IProject; // comes from getServerSideProps (at bottom of page)
 }
 
 export default function ViewProjectTasks({ project }: Props) {
-  const [openModal, setOpenModal] = useState<boolean>(false);
-  const { Text } = Typography;
+  const [openNewTaskModal, setOpenNewTaskModal] = useState<boolean>(false);
 
-  const completeTasks = project.tasks?.filter((task) => {
-    return task.status;
+  const todoTasks = project.tasks?.filter((task) => {
+    return task.status === "todo";
   });
-  const incompleteTasks = project.tasks?.filter((task) => {
-    return !task.status;
+  const inProgressTasks = project.tasks?.filter((task) => {
+    return task.status === "inProgress";
   });
-
+  const doneTasks = project.tasks?.filter((task) => {
+    return task.status === "done";
+  });
   const displayEmptyTable = () => (
     <div style={{ textAlign: "center" }}>No Tasks</div>
   );
 
   const refreshData = () => {
-    // refetches data (projects)
+    // refetches data (project)
+    console.log("refetch");
     router.replace(router.asPath); //FIXME: make global?
   };
-
-  // const onChangeStatus = async (taskId: String, status: boolean) => {
-  //   if (project && project.tasks) {
-  //     const taskIndex = project.tasks.findIndex((task) => task._id === taskId);
-  //     project.tasks[taskIndex].status = status;
-  //   }
-  //   try {
-  //     await updateProject(project._id, project);
-  //     refreshData(); // data refetched once project has been deleted
-  //   } catch (error: any) {
-  //     message.error("There was an issue moving the task, please try again", 2);
-  //   }
-  // };
 
   const onAddTask = async (taskValues: {
     description: string;
     ranking: number;
   }) => {
+    const hideMessage = message.loading("Loading..", 0);
     try {
       const res = await addTask(project._id, taskValues);
-      console.log(res.data);
+      message.success(`Task has been added into ${project.name}!`, 2);
       refreshData(); // data refetched once project has been deleted
     } catch (error: any) {
       message.error("There was an issue adding the task, please try again", 2);
+    } finally {
+      hideMessage();
     }
-    setOpenModal(false);
+    setOpenNewTaskModal(false);
   };
 
   const onCancelModal = () => {
     // when modal is closed
-    setOpenModal(false);
+    setOpenNewTaskModal(false);
   };
 
-  const columns = [
+  const columnsWithButtons = [
     {
-      title: "Task",
+      title: (
+        <div style={{ display: "flex", justifyContent: "space-between" }}>
+          Tasks
+          <Button
+            size="small"
+            type="default"
+            onClick={() => {
+              setOpenNewTaskModal(true);
+            }}
+            style={{
+              backgroundColor: "#108ee9",
+              color: "white",
+              border: "none",
+            }}
+          >
+            Add Task
+          </Button>
+        </div>
+      ),
       dataIndex: "description",
-      // render: (tasks: ITask[], task: ITask) => {
-      //   return (
-      //     <Space size={"large"}>
-      //       {task.status ? (
-      //         <Text
-      //           onClick={() => {
-      //             onChangeStatus(task._id, false);
-      //           }}
-      //         >
-      //           <MinusCircleTwoTone style={{ fontSize: "20px" }} />
-      //         </Text>
-      //       ) : (
-      //         <CheckCircleTwoTone
-      //           onClick={() => {
-      //             onChangeStatus(task._id, true);
-      //           }}
-      //           style={{ fontSize: "20px" }}
-      //           twoToneColor={"#6dc76d"}
-      //         />
-      //       )}
-      //       {task.description}
-      //     </Space>
-      //   );
-      // },
       key: "description",
     },
     {
-      title: "Ranking",
+      title: "Score",
+      dataIndex: "ranking",
+      key: "ranking",
+    },
+  ];
+
+  const columns = [
+    {
+      title: "tasks",
+      dataIndex: "description",
+      key: "description",
+    },
+    {
+      title: "Score",
       dataIndex: "ranking",
       key: "ranking",
     },
@@ -117,50 +151,59 @@ export default function ViewProjectTasks({ project }: Props) {
   return (
     <PageLayout>
       <Space
-        style={{ color: "black", fontWeight: "600", cursor: "pointer" }}
+        style={{
+          fontWeight: "600",
+          cursor: "pointer",
+          marginTop: "10px",
+          marginLeft: "-25px",
+        }}
         onClick={() => {
           router.back();
         }}
       >
         <LeftOutlined />
-        Projects
+        Back
       </Space>
-      <div>
-        <Button
-          size="large"
-          type="default"
-          onClick={() => {
-            setOpenModal(true);
-          }}
-          style={{
-            marginBottom: "35px",
-            backgroundColor: "#108ee9",
-            color: "white",
-            border: "none",
-          }}
-        >
-          Add Task
-        </Button>
+      <h1 style={{ marginTop: "30px", fontSize: "21px", marginBottom: "8px" }}>
+        {project.name} overview
+      </h1>
+      <div style={{}}>
         <ConfigProvider renderEmpty={displayEmptyTable}>
-          <h2 style={{ fontSize: "17px", color: "black" }}>Todo</h2>
-          <Table
-            size="large"
-            dataSource={incompleteTasks}
-            columns={columns}
-            pagination={false}
-            style={{ marginBottom: "40px" }}
-          />
-          <h2 style={{ fontSize: "17px", color: "black" }}>Completed</h2>
-          <Table
-            size="large"
-            dataSource={completeTasks}
-            columns={columns}
-            pagination={false}
-            style={{ marginBottom: "20px" }}
-          />
+          <Row gutter={[16, 16]}>
+            <Col span={8}>
+              <h2 style={{ fontSize: "17px" }}>Todo</h2>
+              <Table
+                size="large"
+                dataSource={todoTasks}
+                columns={columnsWithButtons}
+                pagination={false}
+                style={{ marginBottom: "40px" }}
+              />
+            </Col>
+            <Col span={8}>
+              <h2 style={{ fontSize: "17px" }}>In Progress</h2>
+              <Table
+                size="large"
+                dataSource={inProgressTasks}
+                columns={columns}
+                pagination={false}
+                style={{ marginBottom: "20px" }}
+              />
+            </Col>
+            <Col span={8}>
+              <h2 style={{ fontSize: "17px" }}>Done</h2>
+              <Table
+                size="large"
+                dataSource={doneTasks}
+                columns={columns}
+                pagination={false}
+                style={{ marginBottom: "20px" }}
+              />
+            </Col>
+          </Row>
         </ConfigProvider>
         <AddTaskModal
-          open={openModal}
+          open={openNewTaskModal}
           handleCancel={onCancelModal}
           onAddTask={onAddTask}
         />

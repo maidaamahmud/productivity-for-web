@@ -4,10 +4,12 @@ import Head from "next/head";
 import Image from "next/image";
 import { GetStaticProps } from "next/types";
 import { useEffect, useMemo, useState } from "react";
+import AddTaskModal from "../components/AddTaskModal";
 import PageLayout from "../components/PageLayout";
 import SprintModal from "../components/SprintModal";
 import styles from "../styles/Home.module.css";
 import { IProject, ITask } from "../type";
+import ViewProjectTasks from "./projects/[id]";
 
 interface IListData extends ITask {
   project: String;
@@ -42,32 +44,38 @@ export default function Home({ projects }: Props) {
   ];
 
   const listData = useMemo(() => {
-    let todayData: IListData[] = [];
-    let sprintData: IListData[] = [];
+    let todoList: IListData[] = [];
+    let inProgressList: IListData[] = [];
+    let doneList: IListData[] = [];
 
     projects.forEach((project) => {
       project.tasks?.forEach((task) => {
-        if (task.lists.includes("sprint")) {
-          sprintData.push({ project: project.name, ...task });
-        }
-        if (task.lists.includes("today")) {
-          todayData.push({ project: project.name, ...task });
+        if (task.isSprint === true) {
+          if (task.status === "todo") {
+            todoList.push({ project: project.name, ...task });
+          }
+          if (task.status === "inProgress") {
+            inProgressList.push({ project: project.name, ...task });
+          }
+          if (task.status === "done") {
+            doneList.push({ project: project.name, ...task });
+          }
         }
       });
     });
 
-    return { todayData, sprintData };
+    return { todoList, inProgressList, doneList };
   }, [projects]);
 
-  const [openModal, setOpenModal] = useState<boolean>(false);
+  const [openSprintModal, setOpenSprintModal] = useState<boolean>(false);
 
   const onCancelModal = () => {
     // when modal is closed
-    setOpenModal(false);
+    setOpenSprintModal(false);
   };
 
   const onStartSprint = () => {
-    setOpenModal(false);
+    setOpenSprintModal(false);
   };
 
   const displayEmptyTable = () => (
@@ -81,7 +89,7 @@ export default function Home({ projects }: Props) {
           size="large"
           type="default"
           onClick={() => {
-            setOpenModal(true);
+            setOpenSprintModal(true);
           }}
           style={{
             marginBottom: "35px",
@@ -94,18 +102,18 @@ export default function Home({ projects }: Props) {
         </Button>
         <div>
           <ConfigProvider renderEmpty={displayEmptyTable}>
-            <h2 style={{ fontSize: "17px", color: "black" }}>Today</h2>
+            <h2 style={{ fontSize: "17px" }}>Today</h2>
             <Table
               size="large"
-              dataSource={listData.todayData}
+              dataSource={listData.doneList}
               columns={columns}
               pagination={false}
               style={{ marginBottom: "40px" }}
             />
-            <h2 style={{ fontSize: "17px", color: "black" }}>Sprint</h2>
+            <h2 style={{ fontSize: "17px", fontWeight: "" }}>Sprint</h2>
             <Table
               size="large"
-              dataSource={listData.sprintData}
+              dataSource={listData.doneList}
               columns={columns}
               pagination={false}
               style={{ marginBottom: "20px" }}
@@ -113,7 +121,7 @@ export default function Home({ projects }: Props) {
           </ConfigProvider>
         </div>
         <SprintModal
-          open={openModal}
+          open={openSprintModal}
           handleCancel={onCancelModal}
           onStartSprint={onStartSprint}
         />

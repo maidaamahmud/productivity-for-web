@@ -5,8 +5,22 @@ import { useRouter } from "next/router";
 import { IProject, ITask } from "../../type";
 import { useState } from "react";
 import NewProjectModal from "../../components/NewProjectModal";
-import { Button, message, Card, List, Space, Progress } from "antd";
-import { EditOutlined, DeleteOutlined, EyeOutlined } from "@ant-design/icons";
+import {
+  Button,
+  message,
+  Card,
+  List,
+  Space,
+  Progress,
+  ConfigProvider,
+  Popconfirm,
+} from "antd";
+import {
+  EditOutlined,
+  DeleteOutlined,
+  EyeOutlined,
+  QuestionCircleOutlined,
+} from "@ant-design/icons";
 import { addProject, updateProject, deleteProject } from "../api";
 
 interface Props {
@@ -14,7 +28,8 @@ interface Props {
 }
 
 export default function Projects({ projects }: Props) {
-  const [openModal, setOpenModal] = useState<boolean>(false);
+  const [openNewProjectModal, setOpenNewProjectModal] =
+    useState<boolean>(false);
 
   const router = useRouter();
 
@@ -23,9 +38,17 @@ export default function Projects({ projects }: Props) {
     router.replace(router.asPath);
   };
 
+  const displayEmptyList = () => (
+    <>
+      <i style={{ textAlign: "center", fontSize: "17px" }}>
+        You have no projects at the moment
+      </i>
+    </>
+  );
+
   const onCancelModal = () => {
     // when modal is closed
-    setOpenModal(false);
+    setOpenNewProjectModal(false);
   };
 
   const onCreateProject = async (values: Omit<IProject, "_id">) => {
@@ -43,7 +66,7 @@ export default function Projects({ projects }: Props) {
     } finally {
       hideMessage();
     }
-    setOpenModal(false);
+    setOpenNewProjectModal(false);
   };
 
   const onDeleteProject = async (id: String) => {
@@ -69,7 +92,7 @@ export default function Projects({ projects }: Props) {
       let totalRank = 0;
       let userRank = 0;
       projectTasks.forEach((task) => {
-        task.status ? (userRank += task.ranking) : null;
+        task.status === "done" ? (userRank += task.ranking) : null;
         totalRank += task.ranking;
         progressPercentage = Math.round((userRank / totalRank) * 100);
       });
@@ -79,12 +102,12 @@ export default function Projects({ projects }: Props) {
 
   return (
     <PageLayout>
-      <div>
+      <div style={{ marginTop: "40px" }}>
         <Button
           size="large"
           type="default"
           onClick={() => {
-            setOpenModal(true); // this opens the ProjectModal component
+            setOpenNewProjectModal(true); // this opens the ProjectModal component
           }}
           style={{
             marginBottom: "35px",
@@ -95,58 +118,68 @@ export default function Projects({ projects }: Props) {
         >
           New Project
         </Button>
-        {/* grid attribute in List component determines how many boxes (Card components) should appear in a row depending on the screen size*/}
-        <List
-          grid={{
-            gutter: 5,
-            xs: 1,
-            sm: 1,
-            md: 2,
-            lg: 2,
-            xl: 3,
-            xxl: 4,
-          }}
-          dataSource={projects}
-          renderItem={(project) => (
-            <List.Item>
-              <Card
-                title={project.name}
-                actions={[
-                  <Space
-                    key="view"
-                    onClick={() => {
-                      router.push("/projects/" + project._id);
-                    }}
-                  >
-                    <EyeOutlined />
-                    View
-                  </Space>,
-                  <Space
-                    key="delete"
-                    onClick={() => {
-                      onDeleteProject(project._id);
-                    }}
-                  >
-                    <DeleteOutlined key="delete" />
-                    Delete
-                  </Space>,
-                ]}
-              >
-                <div style={{ display: "flex", justifyContent: "center" }}>
-                  <Progress
-                    type="circle"
-                    width={70}
-                    strokeColor={{ "0%": "#108ee9", "100%": "#87d068" }}
-                    strokeWidth={8}
-                    percent={findProjectProgress(project.tasks)}
-                  />
-                </div>
-              </Card>
-            </List.Item>
-          )}
-        />
+        <ConfigProvider renderEmpty={displayEmptyList}>
+          {/* grid attribute in List component determines how many boxes (Card components) should appear in a row depending on the screen size*/}
+          <List
+            grid={{
+              gutter: 5,
+              xs: 1,
+              sm: 1,
+              md: 2,
+              lg: 2,
+              xl: 3,
+              xxl: 4,
+            }}
+            dataSource={projects}
+            renderItem={(project) => (
+              <List.Item>
+                <Card
+                  title={project.name}
+                  actions={[
+                    <Space
+                      key="view"
+                      onClick={() => {
+                        router.push("/projects/" + project._id);
+                      }}
+                    >
+                      <EyeOutlined />
+                      View
+                    </Space>,
+                    <Popconfirm
+                      icon={<QuestionCircleOutlined style={{ color: "red" }} />}
+                      key="delete"
+                      title="Are you sure you would like to delete this project?"
+                      onConfirm={() => {
+                        onDeleteProject(project._id);
+                      }}
+                      onCancel={() => {}}
+                      okText="Delete"
+                      okType={"danger"}
+                      cancelText="No"
+                    >
+                      <Space key="delete">
+                        <DeleteOutlined key="delete" />
+                        Delete
+                      </Space>
+                    </Popconfirm>,
+                  ]}
+                >
+                  <div style={{ display: "flex", justifyContent: "center" }}>
+                    <Progress
+                      type="circle"
+                      width={70}
+                      strokeColor={{ "0%": "#108ee9", "100%": "#87d068" }}
+                      strokeWidth={8}
+                      percent={findProjectProgress(project.tasks)}
+                    />
+                  </div>
+                </Card>
+              </List.Item>
+            )}
+          />
+        </ConfigProvider>
         <NewProjectModal
-          open={openModal}
+          open={openNewProjectModal}
           onCreate={onCreateProject}
           handleCancel={onCancelModal}
         />

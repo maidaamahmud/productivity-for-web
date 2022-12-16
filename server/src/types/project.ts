@@ -8,6 +8,6 @@ export interface IProject extends Document {
 export interface ITask extends Document {
   description: string;
   ranking: number;
-  status: boolean;
-  lists: string[];
+  status: string;
+  inSprint: boolean;
 }
