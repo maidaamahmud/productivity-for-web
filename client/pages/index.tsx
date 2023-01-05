@@ -1,15 +1,35 @@
-import { Button, ConfigProvider, Empty, Table } from "antd";
+import { Button, Col, ConfigProvider, Empty, Row, Space, Table } from "antd";
 import axios from "axios";
-import Head from "next/head";
-import Image from "next/image";
 import { GetStaticProps } from "next/types";
-import { useEffect, useMemo, useState } from "react";
-import AddTaskModal from "../components/AddTaskModal";
-import PageLayout from "../components/PageLayout";
-import SprintModal from "../components/SprintModal";
-import styles from "../styles/Home.module.css";
+import { useMemo, useState } from "react";
+import FormModal from "../components/general/FormModal";
+
+import PageLayout from "../components/general/PageLayout";
+
 import { IProject, ITask } from "../type";
-import ViewProjectTasks from "./projects/[id]";
+
+const columns = [
+  {
+    title: "Task",
+    dataIndex: "description",
+    key: "description",
+  },
+  {
+    title: "Ranking",
+    dataIndex: "ranking",
+    key: "ranking",
+  },
+  {
+    title: "Project",
+    dataIndex: "project",
+    key: "project",
+  },
+  {
+    title: "Status",
+    dataIndex: "status",
+    key: "status",
+  },
+];
 
 interface IListData extends ITask {
   project: String;
@@ -20,61 +40,37 @@ interface Props {
 }
 
 export default function Home({ projects }: Props) {
-  const columns = [
-    {
-      title: "Task",
-      dataIndex: "description",
-      key: "description",
-    },
-    {
-      title: "Ranking",
-      dataIndex: "ranking",
-      key: "ranking",
-    },
-    {
-      title: "Project",
-      dataIndex: "project",
-      key: "project",
-    },
-    {
-      title: "Status",
-      dataIndex: "status",
-      key: "status",
-    },
-  ];
+  const [openSprintModal, setOpenSprintModal] = useState<boolean>(false);
 
-  const listData = useMemo(() => {
-    let todoList: IListData[] = [];
-    let inProgressList: IListData[] = [];
-    let doneList: IListData[] = [];
+  const tableData = useMemo(() => {
+    let todoTasks: IListData[] = [];
+    let inProgressTasks: IListData[] = [];
+    let doneTasks: IListData[] = [];
 
     projects.forEach((project) => {
       project.tasks?.forEach((task) => {
         if (task.isSprint === true) {
           if (task.status === "todo") {
-            todoList.push({ project: project.name, ...task });
+            todoTasks.push({ project: project.name, ...task });
           }
           if (task.status === "inProgress") {
-            inProgressList.push({ project: project.name, ...task });
+            inProgressTasks.push({ project: project.name, ...task });
           }
           if (task.status === "done") {
-            doneList.push({ project: project.name, ...task });
+            doneTasks.push({ project: project.name, ...task });
           }
         }
       });
     });
-
-    return { todoList, inProgressList, doneList };
+    return { todoTasks, inProgressTasks, doneTasks };
   }, [projects]);
 
-  const [openSprintModal, setOpenSprintModal] = useState<boolean>(false);
-
-  const onCancelModal = () => {
-    // when modal is closed
+  const onStartSprint = () => {
     setOpenSprintModal(false);
   };
 
-  const onStartSprint = () => {
+  const onCancelSprintModal = () => {
+    // when modal is closed
     setOpenSprintModal(false);
   };
 
@@ -84,7 +80,7 @@ export default function Home({ projects }: Props) {
 
   return (
     <PageLayout>
-      <div>
+      <div style={{ marginTop: "40px" }}>
         <Button
           size="large"
           type="default"
@@ -102,29 +98,48 @@ export default function Home({ projects }: Props) {
         </Button>
         <div>
           <ConfigProvider renderEmpty={displayEmptyTable}>
-            <h2 style={{ fontSize: "17px" }}>Today</h2>
-            <Table
-              size="large"
-              dataSource={listData.doneList}
-              columns={columns}
-              pagination={false}
-              style={{ marginBottom: "40px" }}
-            />
-            <h2 style={{ fontSize: "17px", fontWeight: "" }}>Sprint</h2>
-            <Table
-              size="large"
-              dataSource={listData.doneList}
-              columns={columns}
-              pagination={false}
-              style={{ marginBottom: "20px" }}
-            />
+            <Row gutter={[16, 16]}>
+              <Col span={8}>
+                <h2 style={{ fontSize: "17px" }}>Todo</h2>
+                <Table
+                  size="large"
+                  dataSource={tableData.todoTasks}
+                  columns={columns}
+                  pagination={false}
+                  style={{ marginBottom: "40px" }}
+                />
+              </Col>
+              <Col span={8}>
+                <h2 style={{ fontSize: "17px" }}>In Progress</h2>
+                <Table
+                  size="large"
+                  dataSource={tableData.inProgressTasks}
+                  columns={columns}
+                  pagination={false}
+                  style={{ marginBottom: "20px" }}
+                />
+              </Col>
+              <Col span={8}>
+                <h2 style={{ fontSize: "17px" }}>Done</h2>
+                <Table
+                  size="large"
+                  dataSource={tableData.doneTasks}
+                  columns={columns}
+                  pagination={false}
+                  style={{ marginBottom: "20px" }}
+                />
+              </Col>
+            </Row>
           </ConfigProvider>
+          {/* <FormModal
+            isOpen={openSprintModal}
+            onCancel={onCancelSprintModal}
+            onOk={hi}
+            title={"Create Sprint"}
+          >
+            hi
+          </FormModal> */}
         </div>
-        <SprintModal
-          open={openSprintModal}
-          handleCancel={onCancelModal}
-          onStartSprint={onStartSprint}
-        />
       </div>
     </PageLayout>
   );

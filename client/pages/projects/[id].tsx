@@ -1,23 +1,27 @@
 import {
-  Divider,
   Button,
   Space,
   Table,
-  Typography,
   message,
   ConfigProvider,
   Row,
   Col,
+  Form,
+  Input,
+  InputNumber,
 } from "antd";
 import { LeftOutlined } from "@ant-design/icons";
 import axios from "axios";
 import { GetStaticProps } from "next";
-import PageLayout from "../../components/PageLayout";
+import PageLayout from "../../components/general/PageLayout";
 import { IProject, ITask } from "../../type";
-import router from "next/router";
+import { useRouter } from "next/router";
 import { addTask, updateProject } from "../api";
-import { useState } from "react";
-import AddTaskModal from "../../components/AddTaskModal";
+import { useMemo, useState } from "react";
+import { refreshData } from "../../utils/globalFunctions";
+import FormModal from "../../components/general/FormModal";
+
+const { TextArea } = Input;
 
 // const onChangeStatus = async (taskId: String, status: boolean) => {
 //   if (project && project.tasks) {
@@ -61,26 +65,22 @@ interface Props {
 }
 
 export default function ViewProjectTasks({ project }: Props) {
+  const router = useRouter();
+
   const [openNewTaskModal, setOpenNewTaskModal] = useState<boolean>(false);
 
-  const todoTasks = project.tasks?.filter((task) => {
-    return task.status === "todo";
-  });
-  const inProgressTasks = project.tasks?.filter((task) => {
-    return task.status === "inProgress";
-  });
-  const doneTasks = project.tasks?.filter((task) => {
-    return task.status === "done";
-  });
-  const displayEmptyTable = () => (
-    <div style={{ textAlign: "center" }}>No Tasks</div>
-  );
-
-  const refreshData = () => {
-    // refetches data (project)
-    console.log("refetch");
-    router.replace(router.asPath); //FIXME: make global?
-  };
+  const tableData = useMemo(() => {
+    const todoTasks = project.tasks?.filter((task) => {
+      return task.status === "todo";
+    });
+    const inProgressTasks = project.tasks?.filter((task) => {
+      return task.status === "inProgress";
+    });
+    const doneTasks = project.tasks?.filter((task) => {
+      return task.status === "done";
+    });
+    return { todoTasks, inProgressTasks, doneTasks };
+  }, [project]);
 
   const onAddTask = async (taskValues: {
     description: string;
@@ -88,9 +88,9 @@ export default function ViewProjectTasks({ project }: Props) {
   }) => {
     const hideMessage = message.loading("Loading..", 0);
     try {
-      const res = await addTask(project._id, taskValues);
+      await addTask(project._id, taskValues);
       message.success(`Task has been added into ${project.name}!`, 2);
-      refreshData(); // data refetched once project has been deleted
+      refreshData(router);
     } catch (error: any) {
       message.error("There was an issue adding the task, please try again", 2);
     } finally {
@@ -99,10 +99,13 @@ export default function ViewProjectTasks({ project }: Props) {
     setOpenNewTaskModal(false);
   };
 
-  const onCancelModal = () => {
-    // when modal is closed
+  const onCancelNewTaskModal = () => {
     setOpenNewTaskModal(false);
   };
+
+  const displayEmptyTable = () => (
+    <div style={{ textAlign: "center" }}>No Tasks</div>
+  );
 
   const columnsWithButtons = [
     {
@@ -164,17 +167,19 @@ export default function ViewProjectTasks({ project }: Props) {
         <LeftOutlined />
         Back
       </Space>
+
       <h1 style={{ marginTop: "30px", fontSize: "21px", marginBottom: "8px" }}>
         {project.name} overview
       </h1>
-      <div style={{}}>
+
+      <div>
         <ConfigProvider renderEmpty={displayEmptyTable}>
           <Row gutter={[16, 16]}>
             <Col span={8}>
               <h2 style={{ fontSize: "17px" }}>Todo</h2>
               <Table
                 size="large"
-                dataSource={todoTasks}
+                dataSource={tableData.todoTasks}
                 columns={columnsWithButtons}
                 pagination={false}
                 style={{ marginBottom: "40px" }}
@@ -184,7 +189,7 @@ export default function ViewProjectTasks({ project }: Props) {
               <h2 style={{ fontSize: "17px" }}>In Progress</h2>
               <Table
                 size="large"
-                dataSource={inProgressTasks}
+                dataSource={tableData.inProgressTasks}
                 columns={columns}
                 pagination={false}
                 style={{ marginBottom: "20px" }}
@@ -194,7 +199,7 @@ export default function ViewProjectTasks({ project }: Props) {
               <h2 style={{ fontSize: "17px" }}>Done</h2>
               <Table
                 size="large"
-                dataSource={doneTasks}
+                dataSource={tableData.doneTasks}
                 columns={columns}
                 pagination={false}
                 style={{ marginBottom: "20px" }}
@@ -202,11 +207,33 @@ export default function ViewProjectTasks({ project }: Props) {
             </Col>
           </Row>
         </ConfigProvider>
-        <AddTaskModal
-          open={openNewTaskModal}
-          handleCancel={onCancelModal}
-          onAddTask={onAddTask}
-        />
+
+        <FormModal
+          isOpen={openNewTaskModal}
+          onCancel={onCancelNewTaskModal}
+          onOk={onAddTask}
+          title={"Add Task"}
+        >
+          <Space>
+            <Form.Item
+              style={{ width: "45vh" }}
+              label={<label style={{ fontWeight: "500" }}> Description </label>}
+              rules={[
+                { required: true, message: "Give this task a description" },
+              ]}
+              name="description"
+            >
+              <TextArea autoSize={true} size={"large"} />
+            </Form.Item>
+            <Form.Item
+              label={<label style={{ fontWeight: "500" }}> Ranking </label>}
+              rules={[{ required: true, message: "Rank from 1-8" }]}
+              name="ranking"
+            >
+              <InputNumber min={1} max={8} size={"large"} />
+            </Form.Item>
+          </Space>
+        </FormModal>
       </div>
     </PageLayout>
   );
@@ -215,7 +242,7 @@ export default function ViewProjectTasks({ project }: Props) {
 export const getServerSideProps: GetStaticProps = async (context) => {
   const { params } = context; // params contains the dynamic variables in the route (id)
   const BASE_URL: string = "http://127.0.0.1:4000";
-  const results = await axios.get(BASE_URL + "/projects/" + params!.id); //FIXME: move to api?
+  const results = await axios.get(BASE_URL + "/projects/" + params!.id);
   return {
     props: {
       project: results.data.project,

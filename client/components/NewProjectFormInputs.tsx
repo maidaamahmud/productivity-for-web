@@ -1,21 +1,10 @@
-import { Button, Form, FormInstance, Input, InputNumber, Space } from "antd";
+import { Button, Form, Input, InputNumber, Space } from "antd";
 import { MinusCircleOutlined } from "@ant-design/icons";
 const { TextArea } = Input;
 
-interface Props {
-  form: FormInstance<any>;
-}
-
-export default function NewProjectForm({ form }: Props) {
+export default function NewProjectFormInputs() {
   return (
-    <Form
-      layout={"vertical"}
-      requiredMark={"optional"}
-      form={form}
-      name="newProjectForm"
-      autoComplete="off"
-      style={{ paddingTop: "15px" }}
-    >
+    <>
       <Form.Item
         label={<label style={{ fontWeight: "500" }}> Project name </label>}
         rules={[{ required: true, message: "Give this project a name" }]}
@@ -96,6 +85,6 @@ export default function NewProjectForm({ form }: Props) {
           )}
         </Form.List>
       </div>
-    </Form>
+    </>
   );
 }

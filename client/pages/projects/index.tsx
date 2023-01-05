@@ -1,10 +1,9 @@
-import PageLayout from "../../components/PageLayout";
-import axios, { AxiosResponse } from "axios";
+import PageLayout from "../../components/general/PageLayout";
+import axios from "axios";
 import { GetStaticProps } from "next";
 import { useRouter } from "next/router";
 import { IProject, ITask } from "../../type";
 import { useState } from "react";
-import NewProjectModal from "../../components/NewProjectModal";
 import {
   Button,
   message,
@@ -14,42 +13,28 @@ import {
   Progress,
   ConfigProvider,
   Popconfirm,
+  Tooltip,
 } from "antd";
 import {
-  EditOutlined,
   DeleteOutlined,
   EyeOutlined,
   QuestionCircleOutlined,
+  InfoCircleOutlined,
 } from "@ant-design/icons";
-import { addProject, updateProject, deleteProject } from "../api";
+import { addProject, deleteProject } from "../api";
+import { refreshData } from "../../utils/globalFunctions";
+import FormModal from "../../components/general/FormModal";
+import NewProjectFormInputs from "../../components/NewProjectFormInputs";
 
 interface Props {
   projects: IProject[]; // comes from getServerSideProps (at bottom of page)
 }
 
 export default function Projects({ projects }: Props) {
-  const [openNewProjectModal, setOpenNewProjectModal] =
-    useState<boolean>(false);
-
   const router = useRouter();
 
-  const refreshData = () => {
-    // refetches data (projects)
-    router.replace(router.asPath);
-  };
-
-  const displayEmptyList = () => (
-    <>
-      <i style={{ textAlign: "center", fontSize: "17px" }}>
-        You have no projects at the moment
-      </i>
-    </>
-  );
-
-  const onCancelModal = () => {
-    // when modal is closed
-    setOpenNewProjectModal(false);
-  };
+  const [openNewProjectModal, setOpenNewProjectModal] =
+    useState<boolean>(false);
 
   const onCreateProject = async (values: Omit<IProject, "_id">) => {
     // loading message appears whilst project is being created, once complete user recieves a response message
@@ -60,7 +45,7 @@ export default function Projects({ projects }: Props) {
         `${res.data.project?.name} has successfully been created!`,
         2
       );
-      refreshData(); // data refetched once new project added to database
+      refreshData(router);
     } catch (error: any) {
       message.error("There seems to have been an issue, please try again.", 2);
     } finally {
@@ -70,12 +55,11 @@ export default function Projects({ projects }: Props) {
   };
 
   const onDeleteProject = async (id: String) => {
-    // loading message appears whilst project is being deleted , once complete user recieves a response message
     const hideMessage = message.loading("Loading..", 0);
     try {
       const res = await deleteProject(id);
       message.success(`${res.data.project?.name} has been deleted!`, 2);
-      refreshData(); // data refetched once project has been deleted
+      refreshData(router);
     } catch (error: any) {
       message.error(
         "We were unable to delete this project, please try again.",
@@ -84,6 +68,10 @@ export default function Projects({ projects }: Props) {
     } finally {
       hideMessage();
     }
+  };
+
+  const onCancelNewProjectModal = () => {
+    setOpenNewProjectModal(false);
   };
 
   const findProjectProgress = (projectTasks?: ITask[]): number => {
@@ -100,6 +88,14 @@ export default function Projects({ projects }: Props) {
     return progressPercentage;
   };
 
+  const displayEmptyList = () => (
+    <>
+      <i style={{ textAlign: "center", fontSize: "17px" }}>
+        You have no projects at the moment
+      </i>
+    </>
+  );
+
   return (
     <PageLayout>
       <div style={{ marginTop: "40px" }}>
@@ -107,7 +103,7 @@ export default function Projects({ projects }: Props) {
           size="large"
           type="default"
           onClick={() => {
-            setOpenNewProjectModal(true); // this opens the ProjectModal component
+            setOpenNewProjectModal(true);
           }}
           style={{
             marginBottom: "35px",
@@ -118,8 +114,10 @@ export default function Projects({ projects }: Props) {
         >
           New Project
         </Button>
+
         <ConfigProvider renderEmpty={displayEmptyList}>
-          {/* grid attribute in List component determines how many boxes (Card components) should appear in a row depending on the screen size*/}
+          {/* grid attribute in List component determines how many boxes (Card components) should appear in a row 
+          depending on the screen size*/}
           <List
             grid={{
               gutter: 5,
@@ -178,11 +176,32 @@ export default function Projects({ projects }: Props) {
             )}
           />
         </ConfigProvider>
-        <NewProjectModal
-          open={openNewProjectModal}
-          onCreate={onCreateProject}
-          handleCancel={onCancelModal}
-        />
+
+        <FormModal
+          isOpen={openNewProjectModal}
+          onCancel={onCancelNewProjectModal}
+          onOk={onCreateProject}
+          title={
+            <Space style={{ fontSize: "17px", fontWeight: "500" }}>
+              <Tooltip
+                title={
+                  <div>
+                    Split your project into tasks and rank them from <b>1-8</b>{" "}
+                    based on time and difficulty
+                  </div>
+                }
+                color={"#108ee9"}
+                key={"#108ee9"}
+              >
+                <InfoCircleOutlined style={{ color: "#108ee9" }} />
+              </Tooltip>
+              Time to plan out your project!
+            </Space>
+          }
+          modalWidth={800}
+        >
+          <NewProjectFormInputs />
+        </FormModal>
       </div>
     </PageLayout>
   );
@@ -191,7 +210,7 @@ export default function Projects({ projects }: Props) {
 export const getServerSideProps: GetStaticProps = async () => {
   // fetches projects, and returns them within props under the name projects
   const BASE_URL: string = "http://127.0.0.1:4000";
-  const results = await axios.get(BASE_URL + "/projects"); //FIXME: move to api?
+  const results = await axios.get(BASE_URL + "/projects");
   return {
     props: {
       projects: results.data.projects,
