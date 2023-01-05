@@ -8,6 +8,44 @@ import PageLayout from "../components/general/PageLayout";
 
 import { IProject, ITask } from "../type";
 
+// const onChangeStatus = async (taskId: String, status: boolean) => {
+//   if (project && project.tasks) {
+//     const taskIndex = project.tasks.findIndex((task) => task._id === taskId);
+//     project.tasks[taskIndex].status = status;
+//   }
+//   try {
+//     await updateProject(project._id, project);
+//     refreshData(); // data refetched once project has been deleted
+//   } catch (error: any) {
+//     message.error("There was an issue moving the task, please try again", 2);
+//   }
+// };
+
+// render: (tasks: ITask[], task: ITask) => {
+//   return (
+//     <Space size={"large"}>
+//       {task.status ? (
+//         <Text
+//           onClick={() => {
+//             onChangeStatus(task._id, false);
+//           }}
+//         >
+//           <MinusCircleTwoTone style={{ fontSize: "20px" }} />
+//         </Text>
+//       ) : (
+//         <CheckCircleTwoTone
+//           onClick={() => {
+//             onChangeStatus(task._id, true);
+//           }}
+//           style={{ fontSize: "20px" }}
+//           twoToneColor={"#6dc76d"}
+//         />
+//       )}
+//       {task.description}
+//     </Space>
+//   );
+// },
+
 const columns = [
   {
     title: "Task",

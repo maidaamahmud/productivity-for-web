@@ -9,8 +9,9 @@ import {
   Form,
   Input,
   InputNumber,
+  Typography,
 } from "antd";
-import { LeftOutlined } from "@ant-design/icons";
+import { LeftOutlined, DeleteOutlined } from "@ant-design/icons";
 import axios from "axios";
 import { GetStaticProps } from "next";
 import PageLayout from "../../components/general/PageLayout";
@@ -22,46 +23,10 @@ import { refreshData } from "../../utils/globalFunctions";
 import FormModal from "../../components/general/FormModal";
 
 const { TextArea } = Input;
+const { Text } = Typography;
 
-// const onChangeStatus = async (taskId: String, status: boolean) => {
-//   if (project && project.tasks) {
-//     const taskIndex = project.tasks.findIndex((task) => task._id === taskId);
-//     project.tasks[taskIndex].status = status;
-//   }
-//   try {
-//     await updateProject(project._id, project);
-//     refreshData(); // data refetched once project has been deleted
-//   } catch (error: any) {
-//     message.error("There was an issue moving the task, please try again", 2);
-//   }
-// };
-
-// render: (tasks: ITask[], task: ITask) => {
-//   return (
-//     <Space size={"large"}>
-//       {task.status ? (
-//         <Text
-//           onClick={() => {
-//             onChangeStatus(task._id, false);
-//           }}
-//         >
-//           <MinusCircleTwoTone style={{ fontSize: "20px" }} />
-//         </Text>
-//       ) : (
-//         <CheckCircleTwoTone
-//           onClick={() => {
-//             onChangeStatus(task._id, true);
-//           }}
-//           style={{ fontSize: "20px" }}
-//           twoToneColor={"#6dc76d"}
-//         />
-//       )}
-//       {task.description}
-//     </Space>
-//   );
-// },
 interface Props {
-  project: IProject; // comes from getServerSideProps (at bottom of page)
+  project: IProject;
 }
 
 export default function ViewProjectTasks({ project }: Props) {
@@ -99,6 +64,22 @@ export default function ViewProjectTasks({ project }: Props) {
     setOpenNewTaskModal(false);
   };
 
+  const onDeleteTask = async (taskId: String) => {
+    if (project && project.tasks) {
+      const taskIndex = project.tasks.findIndex((task) => task._id === taskId);
+      project.tasks.splice(taskIndex, 1);
+    }
+    try {
+      await updateProject(project._id, project);
+      refreshData(router);
+    } catch (error: any) {
+      message.error(
+        "There was an issue deleting the task, please try again",
+        2
+      );
+    }
+  };
+
   const onCancelNewTaskModal = () => {
     setOpenNewTaskModal(false);
   };
@@ -129,6 +110,21 @@ export default function ViewProjectTasks({ project }: Props) {
         </div>
       ),
       dataIndex: "description",
+      render: (tasks: ITask[], task: ITask) => {
+        return (
+          <Space size={"middle"}>
+            <Text
+              onClick={() => {
+                onDeleteTask(task._id);
+              }}
+            >
+              <DeleteOutlined />
+            </Text>
+
+            {task.description}
+          </Space>
+        );
+      },
       key: "description",
     },
     {
