@@ -10,8 +10,13 @@ import {
   Input,
   InputNumber,
   Typography,
+  Tooltip,
 } from "antd";
-import { LeftOutlined, DeleteOutlined } from "@ant-design/icons";
+import {
+  LeftOutlined,
+  DeleteOutlined,
+  PlusCircleOutlined,
+} from "@ant-design/icons";
 import axios from "axios";
 import { GetStaticProps } from "next";
 import PageLayout from "../../components/general/PageLayout";
@@ -80,6 +85,22 @@ export default function ViewProjectTasks({ project }: Props) {
     }
   };
 
+  const onAddToSprint = async (taskId: String) => {
+    if (project && project.tasks) {
+      const taskIndex = project.tasks.findIndex((task) => task._id === taskId);
+      project.tasks[taskIndex].inSprint = true;
+    }
+    try {
+      await updateProject(project._id, project);
+      refreshData(router);
+    } catch (error: any) {
+      message.error(
+        "There was an issue deleting the task, please try again",
+        2
+      );
+    }
+  };
+
   const onCancelNewTaskModal = () => {
     setOpenNewTaskModal(false);
   };
@@ -110,18 +131,21 @@ export default function ViewProjectTasks({ project }: Props) {
         </div>
       ),
       dataIndex: "description",
-      render: (tasks: ITask[], task: ITask) => {
+      render: (description: string, task: ITask) => {
         return (
-          <Space size={"middle"}>
-            <Text
-              onClick={() => {
-                onDeleteTask(task._id);
-              }}
-            >
-              <DeleteOutlined />
-            </Text>
+          <Space size={"small"}>
+            {!task.inSprint ? (
+              // add to sprint
+              <Tooltip title="add to sprint">
+                <PlusCircleOutlined
+                  onClick={() => {
+                    onAddToSprint(task._id);
+                  }}
+                />
+              </Tooltip>
+            ) : null}
 
-            {task.description}
+            {description}
           </Space>
         );
       },
@@ -130,6 +154,24 @@ export default function ViewProjectTasks({ project }: Props) {
     {
       title: "Score",
       dataIndex: "ranking",
+      render: (ranking: number, task: ITask) => {
+        return (
+          <Row>
+            <Col span={6} offset={6}>
+              {ranking}
+            </Col>
+            <Col span={6} offset={6}>
+              <Tooltip title="delete task">
+                <DeleteOutlined
+                  onClick={() => {
+                    onDeleteTask(task._id);
+                  }}
+                />
+              </Tooltip>
+            </Col>
+          </Row>
+        );
+      },
       key: "ranking",
     },
   ];
@@ -209,6 +251,7 @@ export default function ViewProjectTasks({ project }: Props) {
           onCancel={onCancelNewTaskModal}
           onOk={onAddTask}
           title={"Add Task"}
+          okButtonText={"Add"}
         >
           <Space>
             <Form.Item

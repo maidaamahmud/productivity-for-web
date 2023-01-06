@@ -24,7 +24,7 @@ import {
 import { addProject, deleteProject } from "../api";
 import { refreshData } from "../../utils/globalFunctions";
 import FormModal from "../../components/general/FormModal";
-import NewProjectFormInputs from "../../components/NewProjectFormInputs";
+import NewProjectModalContent from "../../components/NewProjectModalContent";
 
 interface Props {
   projects: IProject[]; // comes from getServerSideProps (at bottom of page)
@@ -198,9 +198,10 @@ export default function Projects({ projects }: Props) {
               Time to plan out your project!
             </Space>
           }
+          okButtonText={"Add"}
           modalWidth={800}
         >
-          <NewProjectFormInputs />
+          <NewProjectModalContent />
         </FormModal>
       </div>
     </PageLayout>

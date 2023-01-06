@@ -86,7 +86,7 @@ const addTask = async (req: Request, res: Response): Promise<void> => {
       description: body.description,
       ranking: body.ranking || 1,
       status: "todo",
-      isSprint: false,
+      inSprint: false,
     });
 
     Project.findOneAndUpdate(

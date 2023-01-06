@@ -10,6 +10,7 @@ interface Props {
   onOk: any;
   onCancel: any;
   title: ReactNode;
+  okButtonText?: string;
   modalWidth?: number;
 }
 
@@ -19,6 +20,7 @@ export default function FormModal({
   onCancel,
   onOk,
   title,
+  okButtonText,
   modalWidth,
 }: Props) {
   const [form] = Form.useForm();
@@ -66,7 +68,7 @@ export default function FormModal({
           }}
           onClick={onSubmitForm}
         >
-          Add
+          {okButtonText ? okButtonText : "Ok"}
         </Button>
       </div>
     </Modal>

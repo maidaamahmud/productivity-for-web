@@ -2,7 +2,7 @@ import { Button, Form, Input, InputNumber, Space } from "antd";
 import { MinusCircleOutlined } from "@ant-design/icons";
 const { TextArea } = Input;
 
-export default function NewProjectFormInputs() {
+export default function NewProjectModalContent() {
   return (
     <>
       <Form.Item

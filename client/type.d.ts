@@ -11,7 +11,7 @@ interface ITask {
   description: string;
   ranking: number;
   status: string;
-  isSprint: boolean;
+  inSprint: boolean;
 }
 
 interface ProjectProps {

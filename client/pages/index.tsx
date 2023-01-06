@@ -1,76 +1,29 @@
-import { Button, Col, ConfigProvider, Empty, Row, Space, Table } from "antd";
+import {
+  Button,
+  Col,
+  ConfigProvider,
+  Empty,
+  message,
+  Row,
+  Space,
+  Table,
+  Tooltip,
+} from "antd";
 import axios from "axios";
 import { GetStaticProps } from "next/types";
 import { useMemo, useState } from "react";
 import FormModal from "../components/general/FormModal";
+import { MinusCircleOutlined } from "@ant-design/icons";
 
 import PageLayout from "../components/general/PageLayout";
 
 import { IProject, ITask } from "../type";
-
-// const onChangeStatus = async (taskId: String, status: boolean) => {
-//   if (project && project.tasks) {
-//     const taskIndex = project.tasks.findIndex((task) => task._id === taskId);
-//     project.tasks[taskIndex].status = status;
-//   }
-//   try {
-//     await updateProject(project._id, project);
-//     refreshData(); // data refetched once project has been deleted
-//   } catch (error: any) {
-//     message.error("There was an issue moving the task, please try again", 2);
-//   }
-// };
-
-// render: (tasks: ITask[], task: ITask) => {
-//   return (
-//     <Space size={"large"}>
-//       {task.status ? (
-//         <Text
-//           onClick={() => {
-//             onChangeStatus(task._id, false);
-//           }}
-//         >
-//           <MinusCircleTwoTone style={{ fontSize: "20px" }} />
-//         </Text>
-//       ) : (
-//         <CheckCircleTwoTone
-//           onClick={() => {
-//             onChangeStatus(task._id, true);
-//           }}
-//           style={{ fontSize: "20px" }}
-//           twoToneColor={"#6dc76d"}
-//         />
-//       )}
-//       {task.description}
-//     </Space>
-//   );
-// },
-
-const columns = [
-  {
-    title: "Task",
-    dataIndex: "description",
-    key: "description",
-  },
-  {
-    title: "Ranking",
-    dataIndex: "ranking",
-    key: "ranking",
-  },
-  {
-    title: "Project",
-    dataIndex: "project",
-    key: "project",
-  },
-  {
-    title: "Status",
-    dataIndex: "status",
-    key: "status",
-  },
-];
+import { refreshData } from "../utils/globalFunctions";
+import { updateProject } from "./api";
+import { useRouter } from "next/router";
 
 interface IListData extends ITask {
-  project: String;
+  project: { _id: string; name: string };
 }
 
 interface Props {
@@ -78,7 +31,7 @@ interface Props {
 }
 
 export default function Home({ projects }: Props) {
-  const [openSprintModal, setOpenSprintModal] = useState<boolean>(false);
+  const router = useRouter();
 
   const tableData = useMemo(() => {
     let todoTasks: IListData[] = [];
@@ -87,15 +40,19 @@ export default function Home({ projects }: Props) {
 
     projects.forEach((project) => {
       project.tasks?.forEach((task) => {
-        if (task.isSprint === true) {
+        if (task.inSprint === true) {
+          const taskData = {
+            project: { _id: project._id, name: project.name },
+            ...task,
+          };
           if (task.status === "todo") {
-            todoTasks.push({ project: project.name, ...task });
+            todoTasks.push(taskData);
           }
           if (task.status === "inProgress") {
-            inProgressTasks.push({ project: project.name, ...task });
+            inProgressTasks.push(taskData);
           }
           if (task.status === "done") {
-            doneTasks.push({ project: project.name, ...task });
+            doneTasks.push(taskData);
           }
         }
       });
@@ -104,17 +61,59 @@ export default function Home({ projects }: Props) {
   }, [projects]);
 
   const onStartSprint = () => {
-    setOpenSprintModal(false);
+    console.log("started");
   };
 
-  const onCancelSprintModal = () => {
-    // when modal is closed
-    setOpenSprintModal(false);
+  const onRemoveFromSprint = async (projectId: string, taskId: String) => {
+    const projectIndex = projects.findIndex(
+      (project) => project._id === projectId
+    );
+    const project = projects[projectIndex];
+    if (project.tasks) {
+      const taskIndex = project.tasks.findIndex((task) => task._id === taskId);
+      project.tasks[taskIndex].inSprint = false;
+    }
+    try {
+      await updateProject(project._id, project);
+      refreshData(router);
+    } catch (error: any) {
+      message.error(
+        "There was an issue removing this task from the sprint, please try again",
+        2
+      );
+    }
   };
 
   const displayEmptyTable = () => (
     <div style={{ textAlign: "center" }}>No Tasks</div> //FIXME: add meaningful empty state (no tasks? create a sprint)
   );
+
+  const columns = [
+    {
+      title: "Task",
+      dataIndex: "description",
+      render: (description: string, tasks: IListData) => {
+        return (
+          <Space size={"small"}>
+            <Tooltip title="remove from sprint">
+              <MinusCircleOutlined
+                onClick={() => {
+                  onRemoveFromSprint(tasks.project._id, tasks._id);
+                }}
+              />
+            </Tooltip>
+            {description}
+          </Space>
+        );
+      },
+      key: "description",
+    },
+    {
+      title: "Ranking",
+      dataIndex: "ranking",
+      key: "ranking",
+    },
+  ];
 
   return (
     <PageLayout>
@@ -123,7 +122,7 @@ export default function Home({ projects }: Props) {
           size="large"
           type="default"
           onClick={() => {
-            setOpenSprintModal(true);
+            onStartSprint();
           }}
           style={{
             marginBottom: "35px",
@@ -132,7 +131,7 @@ export default function Home({ projects }: Props) {
             border: "none",
           }}
         >
-          Create Sprint
+          Start Sprint
         </Button>
         <div>
           <ConfigProvider renderEmpty={displayEmptyTable}>
@@ -169,14 +168,6 @@ export default function Home({ projects }: Props) {
               </Col>
             </Row>
           </ConfigProvider>
-          {/* <FormModal
-            isOpen={openSprintModal}
-            onCancel={onCancelSprintModal}
-            onOk={hi}
-            title={"Create Sprint"}
-          >
-            hi
-          </FormModal> */}
         </div>
       </div>
     </PageLayout>
