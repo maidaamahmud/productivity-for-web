@@ -14,13 +14,17 @@ interface ITask {
   inSprint: boolean;
 }
 
-interface ProjectProps {
-  project: IProject; //FIXME: needed?
+export interface ISprint {
+  _id: string;
+  tasks?: ITask[];
+  completed: boolean;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export type ApiDataType = {
   message: string;
   status: string;
   projects: IProject[];
-  project?: IProject; //FIXME: needed?
+  project?: IProject;
 };

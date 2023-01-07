@@ -17,7 +17,7 @@ import { MinusCircleOutlined } from "@ant-design/icons";
 
 import PageLayout from "../components/general/PageLayout";
 
-import { IProject, ITask } from "../type";
+import { IProject, ITask, ISprint } from "../type";
 import { refreshData } from "../utils/globalFunctions";
 import { updateProject } from "./api";
 import { useRouter } from "next/router";
@@ -28,10 +28,12 @@ interface IListData extends ITask {
 
 interface Props {
   projects: IProject[]; // comes from getServerSideProps (at bottom of page)
+  sprints: ISprint[];
 }
 
-export default function Home({ projects }: Props) {
+export default function Home({ projects, sprints }: Props) {
   const router = useRouter();
+  console.log("sprints", sprints);
 
   const tableData = useMemo(() => {
     let todoTasks: IListData[] = [];
@@ -85,7 +87,7 @@ export default function Home({ projects }: Props) {
   };
 
   const displayEmptyTable = () => (
-    <div style={{ textAlign: "center" }}>No Tasks</div> //FIXME: add meaningful empty state (no tasks? create a sprint)
+    <div style={{ textAlign: "center" }}>No Tasks</div> //FIXME: add meaningful empty state (no tasks? add tasks from projects and start a sprint)
   );
 
   const columns = [
@@ -177,10 +179,12 @@ export default function Home({ projects }: Props) {
 export const getServerSideProps: GetStaticProps = async () => {
   // fetches projects, and returns them within props under the name projects
   const BASE_URL: string = "http://127.0.0.1:4000";
-  const results = await axios.get(BASE_URL + "/projects"); //FIXME: move to api?
+  const projectsRes = await axios.get(BASE_URL + "/projects");
+  const sprintsRes = await axios.get(BASE_URL + "/sprints");
   return {
     props: {
-      projects: results.data.projects,
+      projects: projectsRes.data.projects,
+      sprints: sprintsRes.data.sprints,
     },
   };
 };
