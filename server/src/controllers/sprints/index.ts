@@ -11,4 +11,21 @@ const getSprints = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
-export { getSprints };
+const addSprint = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const sprint: ISprint = new Sprint({
+      tasks: null,
+      completed: false,
+    });
+
+    const newSprint: ISprint = await sprint.save();
+
+    res.status(201).json({
+      sprint: newSprint,
+    });
+  } catch (error) {
+    throw error;
+  }
+};
+
+export { getSprints, addSprint };

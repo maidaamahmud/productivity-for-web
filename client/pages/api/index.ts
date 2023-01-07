@@ -3,6 +3,7 @@ import { ApiDataType, IProject } from "../../type";
 
 const BASE_URL: string = "http://127.0.0.1:4000";
 
+// project
 export const addProject = async (
   formData: Omit<IProject, "_id">
 ): Promise<AxiosResponse<ApiDataType>> => {
@@ -40,6 +41,14 @@ export const addTask = async (
   const res: AxiosResponse<ApiDataType> = await axios.put(
     BASE_URL + "/projects/" + id + "/add-task",
     formData
+  );
+  return res;
+};
+
+// sprint
+export const addSprint = async (): Promise<AxiosResponse<ApiDataType>> => {
+  const res: AxiosResponse<ApiDataType> = await axios.post(
+    BASE_URL + "/add-sprint"
   );
   return res;
 };

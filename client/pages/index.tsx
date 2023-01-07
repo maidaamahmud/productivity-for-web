@@ -19,7 +19,7 @@ import PageLayout from "../components/general/PageLayout";
 
 import { IProject, ITask, ISprint } from "../type";
 import { refreshData } from "../utils/globalFunctions";
-import { updateProject } from "./api";
+import { updateProject, addSprint } from "./api";
 import { useRouter } from "next/router";
 
 interface IListData extends ITask {
@@ -33,7 +33,7 @@ interface Props {
 
 export default function Home({ projects, sprints }: Props) {
   const router = useRouter();
-  console.log("sprints", sprints);
+  console.log("sprints", sprints); //REMOVE ME
 
   const tableData = useMemo(() => {
     let todoTasks: IListData[] = [];
@@ -62,8 +62,24 @@ export default function Home({ projects, sprints }: Props) {
     return { todoTasks, inProgressTasks, doneTasks };
   }, [projects]);
 
-  const onStartSprint = () => {
-    console.log("started");
+  const onStartSprint = async () => {
+    // loading message appears whilst project is being created, once complete user recieves a response message
+    const hideMessage = message.loading("Loading..", 0);
+    try {
+      const res = await addSprint();
+      message.success(
+        `The sprint has begun, you have one week to try and complete as many of these tasks as you can!`, //FIXME: display in popup
+        2
+      );
+      refreshData(router);
+    } catch (error: any) {
+      message.error(
+        "There seems to have been an issues starting this sprint, please try again.",
+        2
+      );
+    } finally {
+      hideMessage();
+    }
   };
 
   const onRemoveFromSprint = async (projectId: string, taskId: String) => {
