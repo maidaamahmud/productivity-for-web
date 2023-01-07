@@ -1,7 +1,7 @@
 import { IProject, ITask } from "./../types/project";
 import { model, Schema } from "mongoose";
 
-const taskSchema: Schema = new Schema(
+export const taskSchema: Schema = new Schema(
   {
     description: {
       type: String,
@@ -40,4 +40,4 @@ const projectSchema: Schema = new Schema(
 );
 
 export const Project = model<IProject>("Project", projectSchema);
-export const Task = model<ITask>("student", taskSchema);
+export const Task = model<ITask>("Task", taskSchema);

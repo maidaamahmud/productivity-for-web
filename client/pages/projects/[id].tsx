@@ -135,7 +135,6 @@ export default function ViewProjectTasks({ project }: Props) {
         return (
           <Space size={"small"}>
             {!task.inSprint ? (
-              // add to sprint
               <Tooltip title="add to sprint">
                 <PlusCircleOutlined
                   onClick={() => {
