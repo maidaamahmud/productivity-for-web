@@ -20,7 +20,7 @@ import PageLayout from "../components/general/PageLayout";
 
 import { IProject, ITask, ISprint } from "../type";
 import { refreshData } from "../utils/globalFunctions";
-import { updateProject, addSprint } from "./api";
+import { updateProject, addSprint, updateSprint } from "./api";
 import { useRouter } from "next/router";
 
 interface IListData extends ITask {
@@ -39,10 +39,11 @@ export default function Home({ projects, sprints }: Props) {
 
   const sprintCountdown = useRef<number | null>(null);
   useEffect(() => {
-    if (sprints) {
+    if (sprints.length > 0) {
+      const currentSprint = sprints[sprints.length - 1];
       const daysInSprint = 7;
       const todayDate = new Date();
-      const sprintStartDate = new Date(sprints[sprints.length - 1].createdAt!);
+      const sprintStartDate = new Date(currentSprint.createdAt!);
 
       const _MS_PER_DAY = 1000 * 60 * 60 * 24;
 
@@ -63,7 +64,9 @@ export default function Home({ projects, sprints }: Props) {
 
       const sprintDaysLeft = daysInSprint - sprintDaysPassed;
 
-      if (sprintDaysLeft <= 0) {
+      if (currentSprint.completed == false) {
+        setSprintInProgress(false);
+      } else if (sprintDaysLeft <= 0) {
         setSprintInProgress(false);
       } else if (sprintDaysLeft > 0) {
         setSprintInProgress(true);
@@ -113,7 +116,7 @@ export default function Home({ projects, sprints }: Props) {
           setSprintInProgress(true);
           message.success(
             `The sprint has begun, you have one week to try and complete as many of these tasks as you can!`, //FIXME: display in popup
-            4
+            3
           );
           refreshData(router);
         } catch (error: any) {
@@ -132,8 +135,38 @@ export default function Home({ projects, sprints }: Props) {
     }
   };
 
-  const onEndSprint = () => {
-    setSprintInProgress(false);
+  const onEndSprint = async () => {
+    const currentSprint = sprints[sprints.length - 1];
+    currentSprint.completed = false;
+    console.log(sprints);
+    try {
+      await updateSprint(currentSprint._id, currentSprint);
+      // remove tasks from done list
+      for (const i in taskData.doneTasks) {
+        const taskObject = taskData.doneTasks[i];
+        const projectId = taskObject.project._id;
+        const taskId = taskObject._id;
+
+        const projectIndex = projects.findIndex(
+          (project) => project._id === projectId
+        );
+        const project = projects[projectIndex];
+        if (project.tasks) {
+          const taskIndex = project.tasks.findIndex(
+            (task) => task._id === taskId
+          );
+          project.tasks[taskIndex].inSprint = false;
+        }
+        await updateProject(project._id, project);
+      }
+      // refresh page
+      refreshData(router);
+    } catch (error: any) {
+      message.error(
+        "There was an issue ending the sprint, please try again",
+        2
+      );
+    }
   };
 
   const onRemoveFromSprint = async (projectId: string, taskId: String) => {
@@ -224,12 +257,12 @@ export default function Home({ projects, sprints }: Props) {
                 style={{
                   textAlign: "right",
                   fontWeight: "600",
-                  fontSize: "18px",
+                  fontSize: "16px",
                 }}
               >
                 <ClockCircleOutlined />
-                &nbsp;
-                {sprintCountdown.current} days
+                &nbsp;&nbsp;
+                {`${sprintCountdown.current} days`}
               </h3>
             </Col>
           </Row>

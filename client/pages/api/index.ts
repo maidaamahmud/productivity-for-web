@@ -1,26 +1,26 @@
 import axios, { AxiosResponse } from "axios";
-import { ApiDataType, IProject } from "../../type";
+import { ApiDataType, IProject, ISprint } from "../../type";
 
 const BASE_URL: string = "http://127.0.0.1:4000";
 
 // project
 export const addProject = async (
-  formData: Omit<IProject, "_id">
+  data: Omit<IProject, "_id">
 ): Promise<AxiosResponse<ApiDataType>> => {
   const res: AxiosResponse<ApiDataType> = await axios.post(
     BASE_URL + "/add-project",
-    formData
+    data
   );
   return res;
 };
 
 export const updateProject = async (
   id: String,
-  formData: Omit<IProject, "_id">
+  data: Omit<IProject, "_id">
 ): Promise<AxiosResponse<ApiDataType>> => {
   const res: AxiosResponse<ApiDataType> = await axios.put(
     BASE_URL + "/update-project/" + id,
-    formData
+    data
   );
   return res;
 };
@@ -36,11 +36,11 @@ export const deleteProject = async (
 
 export const addTask = async (
   id: String,
-  formData: { description: String; ranking: number }
+  data: { description: String; ranking: number }
 ): Promise<AxiosResponse<ApiDataType>> => {
   const res: AxiosResponse<ApiDataType> = await axios.put(
     BASE_URL + "/projects/" + id + "/add-task",
-    formData
+    data
   );
   return res;
 };
@@ -49,6 +49,17 @@ export const addTask = async (
 export const addSprint = async (): Promise<AxiosResponse<ApiDataType>> => {
   const res: AxiosResponse<ApiDataType> = await axios.post(
     BASE_URL + "/add-sprint"
+  );
+  return res;
+};
+
+export const updateSprint = async (
+  id: String,
+  data: Omit<ISprint, "_id">
+): Promise<AxiosResponse<ApiDataType>> => {
+  const res: AxiosResponse<ApiDataType> = await axios.put(
+    BASE_URL + "/update-sprint/" + id,
+    data
   );
   return res;
 };

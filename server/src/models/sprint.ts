@@ -13,7 +13,7 @@ const sprintSchema: Schema = new Schema(
     ],
     completed: {
       type: Boolean,
-      required: true,
+      required: false,
     },
   },
   { timestamps: true }

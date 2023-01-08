@@ -7,7 +7,7 @@ import {
   deleteProject,
   addTask,
 } from "../controllers/projects";
-import { getSprints, addSprint } from "../controllers/sprints";
+import { getSprints, addSprint, updateSprint } from "../controllers/sprints";
 
 const router: Router = Router();
 
@@ -28,5 +28,7 @@ router.put("/projects/:id/add-task", addTask);
 router.get("/sprints", getSprints);
 
 router.post("/add-sprint", addSprint);
+
+router.put("/update-sprint/:id", updateSprint);
 
 export default router;

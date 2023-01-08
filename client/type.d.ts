@@ -17,7 +17,7 @@ interface ITask {
 export interface ISprint {
   _id: string;
   tasks?: ITask[];
-  completed: boolean;
+  completed?: boolean;
   createdAt?: string;
   updatedAt?: string;
 }
