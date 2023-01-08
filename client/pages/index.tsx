@@ -4,6 +4,7 @@ import {
   ConfigProvider,
   Empty,
   message,
+  Popconfirm,
   Row,
   Space,
   Table,
@@ -11,9 +12,9 @@ import {
 } from "antd";
 import axios from "axios";
 import { GetStaticProps } from "next/types";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import FormModal from "../components/general/FormModal";
-import { MinusCircleOutlined } from "@ant-design/icons";
+import { MinusCircleOutlined, ClockCircleOutlined } from "@ant-design/icons";
 
 import PageLayout from "../components/general/PageLayout";
 
@@ -33,9 +34,46 @@ interface Props {
 
 export default function Home({ projects, sprints }: Props) {
   const router = useRouter();
-  console.log("sprints", sprints); //REMOVE ME
 
-  const tableData = useMemo(() => {
+  const [sprintInProgress, setSprintInProgress] = useState<boolean>(false);
+
+  const sprintCountdown = useRef<number | null>(null);
+  useEffect(() => {
+    if (sprints) {
+      const daysInSprint = 7;
+      const todayDate = new Date();
+      const sprintStartDate = new Date(sprints[sprints.length - 1].createdAt!);
+
+      const _MS_PER_DAY = 1000 * 60 * 60 * 24;
+
+      const utcSprintStart = Date.UTC(
+        sprintStartDate.getFullYear(),
+        sprintStartDate.getMonth(),
+        sprintStartDate.getDate()
+      );
+      const utcToday = Date.UTC(
+        todayDate.getFullYear(),
+        todayDate.getMonth(),
+        todayDate.getDate()
+      );
+
+      const sprintDaysPassed = Math.floor(
+        (utcToday - utcSprintStart) / _MS_PER_DAY
+      );
+
+      const sprintDaysLeft = daysInSprint - sprintDaysPassed;
+
+      if (sprintDaysLeft <= 0) {
+        setSprintInProgress(false);
+      } else if (sprintDaysLeft > 0) {
+        setSprintInProgress(true);
+      }
+
+      sprintCountdown.current = sprintDaysLeft;
+    }
+  }, [sprints]);
+
+  const taskData = useMemo(() => {
     let todoTasks: IListData[] = [];
     let inProgressTasks: IListData[] = [];
     let doneTasks: IListData[] = [];
@@ -63,23 +101,39 @@ export default function Home({ projects, sprints }: Props) {
   }, [projects]);
 
   const onStartSprint = async () => {
-    // loading message appears whilst project is being created, once complete user recieves a response message
-    const hideMessage = message.loading("Loading..", 0);
-    try {
-      const res = await addSprint();
-      message.success(
-        `The sprint has begun, you have one week to try and complete as many of these tasks as you can!`, //FIXME: display in popup
-        2
-      );
-      refreshData(router);
-    } catch (error: any) {
-      message.error(
-        "There seems to have been an issues starting this sprint, please try again.",
-        2
-      );
-    } finally {
-      hideMessage();
+    if (sprintInProgress == false) {
+      if (
+        taskData.todoTasks.length > 0 ||
+        taskData.inProgressTasks.length > 0
+      ) {
+        // loading message appears whilst project is being created, once complete user recieves a response message
+        const hideMessage = message.loading("Loading..", 0);
+        try {
+          await addSprint();
+          setSprintInProgress(true);
+          message.success(
+            `The sprint has begun, you have one week to try and complete as many of these tasks as you can!`, //FIXME: display in popup
+            4
+          );
+          refreshData(router);
+        } catch (error: any) {
+          message.error(
+            "There seems to have been an issues starting this sprint, please try again.",
+            2
+          );
+        } finally {
+          hideMessage();
+        }
+      } else {
+        message.error("You can't start a sprint with no tasks!", 2);
+      }
+    } else {
+      message.error("End the ongoing sprint to start a new one", 2);
     }
+  };
+
+  const onEndSprint = () => {
+    setSprintInProgress(false);
   };
 
   const onRemoveFromSprint = async (projectId: string, taskId: String) => {
@@ -136,21 +190,66 @@ export default function Home({ projects, sprints }: Props) {
   return (
     <PageLayout>
       <div style={{ marginTop: "40px" }}>
-        <Button
-          size="large"
-          type="default"
-          onClick={() => {
-            onStartSprint();
-          }}
-          style={{
-            marginBottom: "35px",
-            backgroundColor: "#108ee9",
-            color: "white",
-            border: "none",
-          }}
-        >
-          Start Sprint
-        </Button>
+        {sprintInProgress ? (
+          <Row>
+            <Col span={8}>
+              <Popconfirm
+                icon={<></>}
+                key="delete"
+                title="Are you sure you would like to end this sprint early?"
+                onConfirm={() => {
+                  onEndSprint();
+                }}
+                onCancel={() => {}}
+                okText="End"
+                okType={"danger"}
+                cancelText="No"
+              >
+                <Button
+                  size="large"
+                  type="default"
+                  style={{
+                    marginBottom: "35px",
+                    backgroundColor: "red",
+                    color: "white",
+                    border: "none",
+                  }}
+                >
+                  End Sprint
+                </Button>
+              </Popconfirm>
+            </Col>
+            <Col span={8} offset={8}>
+              <h3
+                style={{
+                  textAlign: "right",
+                  fontWeight: "600",
+                  fontSize: "18px",
+                }}
+              >
+                <ClockCircleOutlined />
+                &nbsp;
+                {sprintCountdown.current} days
+              </h3>
+            </Col>
+          </Row>
+        ) : (
+          <Button
+            size="large"
+            type="default"
+            onClick={() => {
+              onStartSprint();
+            }}
+            style={{
+              marginBottom: "35px",
+              backgroundColor: "#108ee9",
+              color: "white",
+              border: "none",
+            }}
+          >
+            Start Sprint
+          </Button>
+        )}
         <div>
           <ConfigProvider renderEmpty={displayEmptyTable}>
             <Row gutter={[16, 16]}>
@@ -158,7 +257,7 @@ export default function Home({ projects, sprints }: Props) {
                 <h2 style={{ fontSize: "17px" }}>Todo</h2>
                 <Table
                   size="large"
-                  dataSource={tableData.todoTasks}
+                  dataSource={taskData.todoTasks}
                   columns={columns}
                   pagination={false}
                   style={{ marginBottom: "40px" }}
@@ -168,7 +267,7 @@ export default function Home({ projects, sprints }: Props) {
                 <h2 style={{ fontSize: "17px" }}>In Progress</h2>
                 <Table
                   size="large"
-                  dataSource={tableData.inProgressTasks}
+                  dataSource={taskData.inProgressTasks}
                   columns={columns}
                   pagination={false}
                   style={{ marginBottom: "20px" }}
@@ -178,7 +277,7 @@ export default function Home({ projects, sprints }: Props) {
                 <h2 style={{ fontSize: "17px" }}>Done</h2>
                 <Table
                   size="large"
-                  dataSource={tableData.doneTasks}
+                  dataSource={taskData.doneTasks}
                   columns={columns}
                   pagination={false}
                   style={{ marginBottom: "20px" }}

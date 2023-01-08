@@ -144,7 +144,7 @@ export default function Projects({ projects }: Props) {
                       View
                     </Space>,
                     <Popconfirm
-                      icon={<QuestionCircleOutlined style={{ color: "red" }} />}
+                      icon={<></>}
                       key="delete"
                       title="Are you sure you would like to delete this project?"
                       onConfirm={() => {
