@@ -273,17 +273,6 @@ export default function Home({ projects, sprints }: Props) {
         return (
           <Space size={"small"}>
             {sprintInProgress ? (
-              <Tooltip title="remove from sprint">
-                <MinusCircleOutlined
-                  onClick={() => {
-                    onRemoveFromSprint(
-                      taskObject.project._id,
-                      taskObject.tasks._id
-                    );
-                  }}
-                />
-              </Tooltip>
-            ) : (
               <Space>
                 <LeftOutlined
                   onClick={() => {
@@ -296,6 +285,17 @@ export default function Home({ projects, sprints }: Props) {
                   }}
                 />
               </Space>
+            ) : (
+              <Tooltip title="remove from sprint">
+                <MinusCircleOutlined
+                  onClick={() => {
+                    onRemoveFromSprint(
+                      taskObject.project._id,
+                      taskObject.tasks._id
+                    );
+                  }}
+                />
+              </Tooltip>
             )}
             {task.description}
           </Space>
