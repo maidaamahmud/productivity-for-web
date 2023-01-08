@@ -4,6 +4,7 @@ import {
   ConfigProvider,
   Empty,
   message,
+  Modal,
   Popconfirm,
   Row,
   Space,
@@ -12,9 +13,13 @@ import {
 } from "antd";
 import axios from "axios";
 import { GetStaticProps } from "next/types";
-import { useEffect, useMemo, useRef, useState } from "react";
-import FormModal from "../components/general/FormModal";
-import { MinusCircleOutlined, ClockCircleOutlined } from "@ant-design/icons";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  MinusCircleOutlined,
+  ClockCircleOutlined,
+  LeftOutlined,
+  RightOutlined,
+} from "@ant-design/icons";
 
 import PageLayout from "../components/general/PageLayout";
 
@@ -23,8 +28,9 @@ import { refreshData } from "../utils/globalFunctions";
 import { updateProject, addSprint, updateSprint } from "./api";
 import { useRouter } from "next/router";
 
-interface IListData extends ITask {
+interface IListData {
   project: { _id: string; name: string };
+  tasks: ITask;
 }
 
 interface Props {
@@ -36,8 +42,92 @@ export default function Home({ projects, sprints }: Props) {
   const router = useRouter();
 
   const [sprintInProgress, setSprintInProgress] = useState<boolean>(false);
+  const [openSprintReviewModal, setOpenSprintReviewModal] = useState(false);
 
   const sprintCountdown = useRef<number | null>(null);
+
+  // runs when projects are refetched, using the status of each task and whether its been added into sprint...
+  // ...it stores these tasks in arrays to be used
+  const taskData = useMemo(() => {
+    let todoTasks: IListData[] = [];
+    let inProgressTasks: IListData[] = [];
+    let doneTasks: IListData[] = [];
+
+    projects.forEach((project) => {
+      project.tasks?.forEach((task) => {
+        if (task.inSprint === true) {
+          const taskData = {
+            project: { _id: project._id, name: project.name },
+            tasks: { ...task },
+          };
+          if (task.status === "todo") {
+            todoTasks.push(taskData);
+          }
+          if (task.status === "inProgress") {
+            inProgressTasks.push(taskData);
+          }
+          if (task.status === "done") {
+            doneTasks.push(taskData);
+          }
+        }
+      });
+    });
+    return { todoTasks, inProgressTasks, doneTasks };
+  }, [projects]);
+
+  const onEndSprint = useCallback(
+    // UseCallback used to memoize
+    async (completed: boolean) => {
+      const currentSprint = sprints[sprints.length - 1];
+
+      const sprintTasks: ITask[] = [];
+      taskData.todoTasks.forEach((taskObject) => {
+        sprintTasks.push(taskObject.tasks);
+      });
+      taskData.inProgressTasks.forEach((taskObject) => {
+        sprintTasks.push(taskObject.tasks);
+      });
+      taskData.doneTasks.forEach((taskObject) => {
+        sprintTasks.push(taskObject.tasks);
+      });
+
+      currentSprint.tasks = sprintTasks;
+      currentSprint.completed = completed;
+      try {
+        await updateSprint(currentSprint._id, currentSprint);
+        currentSprint.completed == true ? setOpenSprintReviewModal(true) : null;
+        // remove tasks from done list
+        for (const i in taskData.doneTasks) {
+          const taskObject = taskData.doneTasks[i];
+          const projectId = taskObject.project._id;
+          const taskId = taskObject.tasks._id;
+
+          const projectIndex = projects.findIndex(
+            (project) => project._id === projectId
+          );
+          const project = projects[projectIndex];
+          if (project.tasks) {
+            const taskIndex = project.tasks.findIndex(
+              (task) => task._id === taskId
+            );
+            project.tasks[taskIndex].inSprint = false;
+          }
+          await updateProject(project._id, project);
+        }
+
+        // refresh page
+        refreshData(router);
+      } catch (error: any) {
+        message.error(
+          "There was an issue ending the sprint, please try again",
+          2
+        );
+      }
+    },
+    [projects, router, sprints, taskData]
+  );
+  // useEffect determines if there is an ongoing sprint and sets the state accordingly
+  // it also stores the number of days left until the sprint is over under the variable name sprintCountdown
   useEffect(() => {
     if (sprints.length > 0) {
       const currentSprint = sprints[sprints.length - 1];
@@ -68,40 +158,14 @@ export default function Home({ projects, sprints }: Props) {
         setSprintInProgress(false);
       } else if (sprintDaysLeft <= 0) {
         setSprintInProgress(false);
+        onEndSprint(true);
       } else if (sprintDaysLeft > 0) {
         setSprintInProgress(true);
       }
 
       sprintCountdown.current = sprintDaysLeft;
     }
-  }, [sprints]);
-
-  const taskData = useMemo(() => {
-    let todoTasks: IListData[] = [];
-    let inProgressTasks: IListData[] = [];
-    let doneTasks: IListData[] = [];
-
-    projects.forEach((project) => {
-      project.tasks?.forEach((task) => {
-        if (task.inSprint === true) {
-          const taskData = {
-            project: { _id: project._id, name: project.name },
-            ...task,
-          };
-          if (task.status === "todo") {
-            todoTasks.push(taskData);
-          }
-          if (task.status === "inProgress") {
-            inProgressTasks.push(taskData);
-          }
-          if (task.status === "done") {
-            doneTasks.push(taskData);
-          }
-        }
-      });
-    });
-    return { todoTasks, inProgressTasks, doneTasks };
-  }, [projects]);
+  }, [sprints, onEndSprint]);
 
   const onStartSprint = async () => {
     if (sprintInProgress == false) {
@@ -135,40 +199,7 @@ export default function Home({ projects, sprints }: Props) {
     }
   };
 
-  const onEndSprint = async () => {
-    const currentSprint = sprints[sprints.length - 1];
-    currentSprint.completed = false;
-    console.log(sprints);
-    try {
-      await updateSprint(currentSprint._id, currentSprint);
-      // remove tasks from done list
-      for (const i in taskData.doneTasks) {
-        const taskObject = taskData.doneTasks[i];
-        const projectId = taskObject.project._id;
-        const taskId = taskObject._id;
-
-        const projectIndex = projects.findIndex(
-          (project) => project._id === projectId
-        );
-        const project = projects[projectIndex];
-        if (project.tasks) {
-          const taskIndex = project.tasks.findIndex(
-            (task) => task._id === taskId
-          );
-          project.tasks[taskIndex].inSprint = false;
-        }
-        await updateProject(project._id, project);
-      }
-      // refresh page
-      refreshData(router);
-    } catch (error: any) {
-      message.error(
-        "There was an issue ending the sprint, please try again",
-        2
-      );
-    }
-  };
-
+  // functions runs when user removes a task from the sprint
   const onRemoveFromSprint = async (projectId: string, taskId: String) => {
     const projectIndex = projects.findIndex(
       (project) => project._id === projectId
@@ -189,25 +220,84 @@ export default function Home({ projects, sprints }: Props) {
     }
   };
 
+  const changeStatus = async (
+    projectId: string,
+    taskId: string,
+    direction: string
+  ) => {
+    const statusArray = ["todo", "inProgress", "done"];
+    const projectIndex = projects.findIndex(
+      (project) => project._id === projectId
+    );
+    const project = projects[projectIndex];
+    if (project.tasks) {
+      const taskIndex = project.tasks.findIndex((task) => task._id === taskId);
+      const previousStatus = project.tasks[taskIndex].status;
+      let statusIndex = statusArray.indexOf(previousStatus);
+      if (direction == "right") {
+        if (statusIndex == 2) {
+          statusIndex = 0;
+        } else {
+          statusIndex++;
+        }
+      } else if (direction == "left") {
+        if (statusIndex == 0) {
+          statusIndex = 2;
+        } else {
+          statusIndex--;
+        }
+      }
+      project.tasks[taskIndex].status = statusArray[statusIndex];
+      try {
+        await updateProject(project._id, project);
+        refreshData(router);
+      } catch (error: any) {}
+    }
+  };
+
+  const onReviewSprint = () => {
+    setOpenSprintReviewModal(false);
+    // FIXME: go to progress
+  };
+
   const displayEmptyTable = () => (
     <div style={{ textAlign: "center" }}>No Tasks</div> //FIXME: add meaningful empty state (no tasks? add tasks from projects and start a sprint)
+    // ADD BUTTON TO TAKE YOU TO PROJECTS
   );
 
   const columns = [
     {
       title: "Task",
-      dataIndex: "description",
-      render: (description: string, tasks: IListData) => {
+      dataIndex: "tasks",
+      render: (task: ITask, taskObject: IListData) => {
         return (
           <Space size={"small"}>
-            <Tooltip title="remove from sprint">
-              <MinusCircleOutlined
-                onClick={() => {
-                  onRemoveFromSprint(tasks.project._id, tasks._id);
-                }}
-              />
-            </Tooltip>
-            {description}
+            {sprintInProgress ? (
+              <Tooltip title="remove from sprint">
+                <MinusCircleOutlined
+                  onClick={() => {
+                    onRemoveFromSprint(
+                      taskObject.project._id,
+                      taskObject.tasks._id
+                    );
+                  }}
+                />
+              </Tooltip>
+            ) : (
+              <Space>
+                <LeftOutlined
+                  onClick={() => {
+                    changeStatus(taskObject.project._id, task._id, "left");
+                  }}
+                />
+                <RightOutlined
+                  onClick={() => {
+                    changeStatus(taskObject.project._id, task._id, "right");
+                  }}
+                />
+              </Space>
+            )}
+            {task.description}
           </Space>
         );
       },
@@ -215,7 +305,10 @@ export default function Home({ projects, sprints }: Props) {
     },
     {
       title: "Ranking",
-      dataIndex: "ranking",
+      dataIndex: "tasks",
+      render: (task: ITask) => {
+        return task.ranking;
+      },
       key: "ranking",
     },
   ];
@@ -231,7 +324,7 @@ export default function Home({ projects, sprints }: Props) {
                 key="delete"
                 title="Are you sure you would like to end this sprint early?"
                 onConfirm={() => {
-                  onEndSprint();
+                  onEndSprint(false);
                 }}
                 onCancel={() => {}}
                 okText="End"
@@ -320,6 +413,31 @@ export default function Home({ projects, sprints }: Props) {
           </ConfigProvider>
         </div>
       </div>
+      <Modal
+        title="Review Your Sprint"
+        open={openSprintReviewModal}
+        onCancel={() => {
+          setOpenSprintReviewModal(false);
+        }}
+        footer={null}
+      >
+        FIXME: Display some data here (one graph or smth)
+        <div style={{ display: " flex", justifyContent: "flex-end" }}>
+          <Button
+            size="large"
+            style={{
+              background: "#108ee9",
+              color: "white",
+              marginTop: "5px",
+              width: "10vh",
+              border: "none",
+            }}
+            onClick={onReviewSprint}
+          >
+            Review
+          </Button>
+        </div>
+      </Modal>
     </PageLayout>
   );
 }
