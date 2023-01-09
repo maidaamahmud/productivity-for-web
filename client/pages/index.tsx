@@ -260,10 +260,27 @@ export default function Home({ projects, sprints }: Props) {
     // FIXME: go to progress
   };
 
-  const displayEmptyTable = () => (
-    <div style={{ textAlign: "center" }}>No Tasks</div> //FIXME: add meaningful empty state (no tasks? add tasks from projects and start a sprint)
-    // ADD BUTTON TO TAKE YOU TO PROJECTS
-  );
+  const displayEmptyTodoTable = () =>
+    !sprintInProgress ? (
+      <>
+        <h4 style={{ fontWeight: "500" }}>
+          Go through your projects and add in what tasks you want to complete in
+          your next sprint
+        </h4>
+        <Button
+          size="middle"
+          type="link"
+          style={{
+            color: "#108ee9",
+          }}
+          onClick={() => {
+            router.push("/projects");
+          }}
+        >
+          Go to Projects
+        </Button>
+      </>
+    ) : null;
 
   const columns = [
     {
@@ -377,10 +394,10 @@ export default function Home({ projects, sprints }: Props) {
           </Button>
         )}
         <div>
-          <ConfigProvider renderEmpty={displayEmptyTable}>
-            <Row gutter={[16, 16]}>
-              <Col span={8}>
-                <h2 style={{ fontSize: "17px" }}>Todo</h2>
+          <Row gutter={[16, 16]}>
+            <Col span={8}>
+              <h2 style={{ fontSize: "17px" }}>Todo</h2>
+              <ConfigProvider renderEmpty={displayEmptyTodoTable}>
                 <Table
                   size="large"
                   dataSource={taskData.todoTasks}
@@ -388,7 +405,13 @@ export default function Home({ projects, sprints }: Props) {
                   pagination={false}
                   style={{ marginBottom: "40px" }}
                 />
-              </Col>
+              </ConfigProvider>
+            </Col>
+            <ConfigProvider
+              renderEmpty={() => {
+                return "";
+              }}
+            >
               <Col span={8}>
                 <h2 style={{ fontSize: "17px" }}>In Progress</h2>
                 <Table
@@ -409,8 +432,8 @@ export default function Home({ projects, sprints }: Props) {
                   style={{ marginBottom: "20px" }}
                 />
               </Col>
-            </Row>
-          </ConfigProvider>
+            </ConfigProvider>
+          </Row>
         </div>
       </div>
       <Modal

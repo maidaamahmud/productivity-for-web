@@ -90,9 +90,10 @@ export default function Projects({ projects }: Props) {
 
   const displayEmptyList = () => (
     <>
-      <i style={{ textAlign: "center", fontSize: "17px" }}>
-        You have no projects at the moment
-      </i>
+      <h2 style={{ textAlign: "center", fontSize: "15px", fontWeight: "500" }}>
+        You have no projects at the moment <br /> Add new projects to start
+        exploring all our features
+      </h2>
     </>
   );
 

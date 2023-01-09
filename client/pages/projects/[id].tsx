@@ -105,11 +105,14 @@ export default function ViewProjectTasks({ project }: Props) {
     setOpenNewTaskModal(false);
   };
 
-  const displayEmptyTable = () => (
-    <div style={{ textAlign: "center" }}>No Tasks</div>
-  );
+  const displayEmptyTodoTable = () =>
+    project.tasks!.length == 0 ? (
+      <h4 style={{ fontWeight: "500" }}>
+        Add tasks to get started on this project
+      </h4>
+    ) : null;
 
-  const columnsWithButtons = [
+  const todoColumns = [
     {
       title: (
         <div style={{ display: "flex", justifyContent: "space-between" }}>
@@ -184,6 +187,24 @@ export default function ViewProjectTasks({ project }: Props) {
     {
       title: "Score",
       dataIndex: "ranking",
+      render: (ranking: number, task: ITask) => {
+        return (
+          <Row>
+            <Col span={6} offset={6}>
+              {ranking}
+            </Col>
+            <Col span={6} offset={6}>
+              <Tooltip title="delete task">
+                <DeleteOutlined
+                  onClick={() => {
+                    onDeleteTask(task._id);
+                  }}
+                />
+              </Tooltip>
+            </Col>
+          </Row>
+        );
+      },
       key: "ranking",
     },
   ];
@@ -210,18 +231,24 @@ export default function ViewProjectTasks({ project }: Props) {
       </h1>
 
       <div>
-        <ConfigProvider renderEmpty={displayEmptyTable}>
-          <Row gutter={[16, 16]}>
-            <Col span={8}>
-              <h2 style={{ fontSize: "17px" }}>Todo</h2>
+        <Row gutter={[16, 16]}>
+          <Col span={8}>
+            <h2 style={{ fontSize: "17px" }}>Todo</h2>
+            <ConfigProvider renderEmpty={displayEmptyTodoTable}>
               <Table
                 size="large"
                 dataSource={tableData.todoTasks}
-                columns={columnsWithButtons}
+                columns={todoColumns}
                 pagination={false}
                 style={{ marginBottom: "40px" }}
               />
-            </Col>
+            </ConfigProvider>
+          </Col>
+          <ConfigProvider
+            renderEmpty={() => {
+              return "";
+            }}
+          >
             <Col span={8}>
               <h2 style={{ fontSize: "17px" }}>In Progress</h2>
               <Table
@@ -242,8 +269,8 @@ export default function ViewProjectTasks({ project }: Props) {
                 style={{ marginBottom: "20px" }}
               />
             </Col>
-          </Row>
-        </ConfigProvider>
+          </ConfigProvider>
+        </Row>
 
         <FormModal
           isOpen={openNewTaskModal}
