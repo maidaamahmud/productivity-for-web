@@ -15,11 +15,10 @@ import axios from "axios";
 import { GetStaticProps } from "next/types";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
-  MinusCircleOutlined,
+  MinusCircleFilled,
   ClockCircleOutlined,
-  LeftOutlined,
-  RightOutlined,
-  ExclamationCircleOutlined,
+  CaretLeftFilled,
+  CaretRightFilled,
 } from "@ant-design/icons";
 
 import PageLayout from "../components/general/PageLayout";
@@ -289,23 +288,26 @@ export default function Home({ projects, sprints }: Props) {
       dataIndex: "tasks",
       render: (task: ITask, taskObject: IListData) => {
         return (
-          <Space size={"small"}>
+          <>
             {sprintInProgress ? (
-              <Space>
-                <LeftOutlined
+              <>
+                <CaretLeftFilled
+                  style={{ color: "#a3a2a2", fontSize: "17px" }}
                   onClick={() => {
                     changeStatus(taskObject.project._id, task._id, "left");
                   }}
                 />
-                <RightOutlined
+                <CaretRightFilled
+                  style={{ color: "#a3a2a2", fontSize: "17px" }}
                   onClick={() => {
                     changeStatus(taskObject.project._id, task._id, "right");
                   }}
                 />
-              </Space>
+              </>
             ) : (
               <Tooltip title="remove from sprint">
-                <MinusCircleOutlined
+                <MinusCircleFilled
+                  style={{ color: "#108ee9" }}
                   onClick={() => {
                     onRemoveFromSprint(
                       taskObject.project._id,
@@ -315,8 +317,9 @@ export default function Home({ projects, sprints }: Props) {
                 />
               </Tooltip>
             )}
+            &nbsp;&nbsp;
             {task.description}
-          </Space>
+          </>
         );
       },
       key: "description",
@@ -342,7 +345,7 @@ export default function Home({ projects, sprints }: Props) {
                 type="default"
                 style={{
                   marginBottom: "35px",
-                  backgroundColor: "red",
+                  backgroundColor: "#ff4d4f",
                   color: "white",
                   border: "none",
                 }}

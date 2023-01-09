@@ -14,8 +14,8 @@ import {
 } from "antd";
 import {
   LeftOutlined,
-  DeleteOutlined,
-  PlusCircleOutlined,
+  DeleteFilled,
+  PlusCircleFilled,
 } from "@ant-design/icons";
 import axios from "axios";
 import { GetStaticProps } from "next";
@@ -139,7 +139,8 @@ export default function ViewProjectTasks({ project }: Props) {
           <Space size={"small"}>
             {!task.inSprint ? (
               <Tooltip title="add to sprint">
-                <PlusCircleOutlined
+                <PlusCircleFilled
+                  style={{ color: "#108ee9" }}
                   onClick={() => {
                     onAddToSprint(task._id);
                   }}
@@ -164,7 +165,8 @@ export default function ViewProjectTasks({ project }: Props) {
             </Col>
             <Col span={6} offset={6}>
               <Tooltip title="delete task">
-                <DeleteOutlined
+                <DeleteFilled
+                  style={{ color: "#a3a2a2" }}
                   onClick={() => {
                     onDeleteTask(task._id);
                   }}
@@ -195,7 +197,8 @@ export default function ViewProjectTasks({ project }: Props) {
             </Col>
             <Col span={6} offset={6}>
               <Tooltip title="delete task">
-                <DeleteOutlined
+                <DeleteFilled
+                  style={{ color: "#a3a2a2" }}
                   onClick={() => {
                     onDeleteTask(task._id);
                   }}

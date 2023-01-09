@@ -15,14 +15,18 @@ import {
   Popconfirm,
   Tooltip,
   Modal,
+  Row,
+  Col,
+  Form,
+  Input,
 } from "antd";
 import {
   DeleteOutlined,
   EyeOutlined,
-  QuestionCircleOutlined,
-  InfoCircleOutlined,
+  InfoCircleFilled,
+  EditFilled,
 } from "@ant-design/icons";
-import { addProject, deleteProject } from "../api";
+import { addProject, deleteProject, updateProject } from "../api";
 import { refreshData } from "../../utils/globalFunctions";
 import FormModal from "../../components/general/FormModal";
 import NewProjectModalContent from "../../components/NewProjectModalContent";
@@ -36,6 +40,8 @@ export default function Projects({ projects }: Props) {
 
   const [openNewProjectModal, setOpenNewProjectModal] =
     useState<boolean>(false);
+  const [openEditNameModal, setOpenEditNameModal] = useState<boolean>(false);
+  const [editProjectId, setEditProjectId] = useState<string | null>(null);
 
   const onCreateProject = async (values: Omit<IProject, "_id">) => {
     // loading message appears whilst project is being created, once complete user recieves a response message
@@ -75,6 +81,29 @@ export default function Projects({ projects }: Props) {
     setOpenNewProjectModal(false);
   };
 
+  const onEditProjectName = async (values: { name: string }) => {
+    if (editProjectId) {
+      const projectIndex = projects.findIndex(
+        (project) => project._id === editProjectId
+      );
+      projects[projectIndex].name = values.name;
+      try {
+        await updateProject(editProjectId, projects[projectIndex]);
+        refreshData(router);
+      } catch (error: any) {
+        message.error(
+          "There seems to have been an issue, please try again.",
+          2
+        );
+      }
+    }
+    setOpenEditNameModal(false);
+  };
+
+  const onCancelEditNameModal = () => {
+    setOpenEditNameModal(false);
+  };
+
   const findProjectProgress = (projectTasks?: ITask[]): number => {
     let progressPercentage = 0;
     if (projectTasks) {
@@ -92,7 +121,7 @@ export default function Projects({ projects }: Props) {
   const displayEmptyList = () => (
     <>
       <h2 style={{ textAlign: "center", fontSize: "15px", fontWeight: "500" }}>
-        You have no projects at the moment <br /> Add new projects to start
+        You have no projects at the moment <br /> Create a new project to start
         exploring all our features
       </h2>
     </>
@@ -134,7 +163,18 @@ export default function Projects({ projects }: Props) {
             renderItem={(project) => (
               <List.Item>
                 <Card
-                  title={project.name}
+                  title={
+                    <Space>
+                      <EditFilled
+                        style={{ color: "#108ee9" }}
+                        onClick={() => {
+                          setEditProjectId(project._id);
+                          setOpenEditNameModal(true);
+                        }}
+                      />
+                      {project.name}
+                    </Space>
+                  }
                   actions={[
                     <Space
                       key="view"
@@ -187,7 +227,7 @@ export default function Projects({ projects }: Props) {
           onCancel={onCancelNewProjectModal}
           onOk={onCreateProject}
           title={
-            <Space style={{ fontSize: "17px", fontWeight: "500" }}>
+            <Space style={{ fontSize: "16px" }}>
               <Tooltip
                 title={
                   <div>
@@ -198,7 +238,7 @@ export default function Projects({ projects }: Props) {
                 color={"#108ee9"}
                 key={"#108ee9"}
               >
-                <InfoCircleOutlined style={{ color: "#108ee9" }} />
+                <InfoCircleFilled style={{ color: "#108ee9" }} />
               </Tooltip>
               Time to plan out your project!
             </Space>
@@ -207,6 +247,22 @@ export default function Projects({ projects }: Props) {
           modalWidth={800}
         >
           <NewProjectModalContent />
+        </FormModal>
+
+        <FormModal
+          isOpen={openEditNameModal}
+          onCancel={onCancelEditNameModal}
+          onOk={onEditProjectName}
+          title={"Edit project name"}
+          okButtonText={"Ok"}
+        >
+          <Form.Item
+            label={<label style={{ fontWeight: "500" }}> Project name </label>}
+            rules={[{ required: true, message: "Give this project a name" }]}
+            name="name"
+          >
+            <Input size={"large"} />
+          </Form.Item>
         </FormModal>
       </div>
     </PageLayout>
