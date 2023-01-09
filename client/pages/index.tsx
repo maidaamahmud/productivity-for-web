@@ -267,7 +267,7 @@ export default function Home({ projects, sprints }: Props) {
   const displayEmptyTodoTable = () =>
     !sprintInProgress ? (
       <>
-        <h4 style={{ fontWeight: "500" }}>
+        <h4>
           Go through your projects and add in what tasks you want to complete in
           your next sprint
         </h4>
@@ -376,8 +376,6 @@ export default function Home({ projects, sprints }: Props) {
               <h3
                 style={{
                   textAlign: "right",
-                  fontWeight: "600",
-                  fontSize: "16px",
                 }}
               >
                 <ClockCircleOutlined />
@@ -406,14 +404,13 @@ export default function Home({ projects, sprints }: Props) {
         <div>
           <Row gutter={[16, 16]}>
             <Col span={8}>
-              <h2 style={{ fontSize: "17px" }}>Todo</h2>
+              <h2>Todo</h2>
               <ConfigProvider renderEmpty={displayEmptyTodoTable}>
                 <Table
                   size="large"
                   dataSource={sprintData.todoTasks}
                   columns={columns}
                   pagination={false}
-                  style={{ marginBottom: "40px" }}
                 />
               </ConfigProvider>
             </Col>
@@ -423,23 +420,21 @@ export default function Home({ projects, sprints }: Props) {
               }}
             >
               <Col span={8}>
-                <h2 style={{ fontSize: "17px" }}>In Progress</h2>
+                <h2>In Progress</h2>
                 <Table
                   size="large"
                   dataSource={sprintData.inProgressTasks}
                   columns={columns}
                   pagination={false}
-                  style={{ marginBottom: "20px" }}
                 />
               </Col>
               <Col span={8}>
-                <h2 style={{ fontSize: "17px" }}>Done</h2>
+                <h2>Done</h2>
                 <Table
                   size="large"
                   dataSource={sprintData.doneTasks}
                   columns={columns}
                   pagination={false}
-                  style={{ marginBottom: "20px" }}
                 />
               </Col>
             </ConfigProvider>

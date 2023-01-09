@@ -120,10 +120,10 @@ export default function Projects({ projects }: Props) {
 
   const displayEmptyList = () => (
     <>
-      <h2 style={{ textAlign: "center", fontSize: "15px", fontWeight: "500" }}>
+      <h3 style={{ textAlign: "center" }}>
         You have no projects at the moment <br /> Create a new project to start
         exploring all our features
-      </h2>
+      </h3>
     </>
   );
 
@@ -235,7 +235,6 @@ export default function Projects({ projects }: Props) {
                   </div>
                 }
                 color={"#108ee9"}
-                key={"#108ee9"}
               >
                 <InfoCircleFilled style={{ color: "#108ee9" }} />
               </Tooltip>

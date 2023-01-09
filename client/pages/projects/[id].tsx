@@ -107,9 +107,7 @@ export default function ViewProjectTasks({ project }: Props) {
 
   const displayEmptyTodoTable = () =>
     project.tasks!.length == 0 ? (
-      <h4 style={{ fontWeight: "500" }}>
-        Add tasks to get started on this project
-      </h4>
+      <h4>Add tasks to get started on this project</h4>
     ) : null;
 
   const todoColumns = [
@@ -229,21 +227,20 @@ export default function ViewProjectTasks({ project }: Props) {
         Back
       </Space>
 
-      <h1 style={{ marginTop: "30px", fontSize: "21px", marginBottom: "8px" }}>
+      <h1 style={{ marginTop: "30px", marginBottom: "8px" }}>
         {project.name} overview
       </h1>
 
       <div>
         <Row gutter={[16, 16]}>
           <Col span={8}>
-            <h2 style={{ fontSize: "17px" }}>Todo</h2>
+            <h2>Todo</h2>
             <ConfigProvider renderEmpty={displayEmptyTodoTable}>
               <Table
                 size="large"
                 dataSource={tableData.todoTasks}
                 columns={todoColumns}
                 pagination={false}
-                style={{ marginBottom: "40px" }}
               />
             </ConfigProvider>
           </Col>
@@ -253,23 +250,21 @@ export default function ViewProjectTasks({ project }: Props) {
             }}
           >
             <Col span={8}>
-              <h2 style={{ fontSize: "17px" }}>In Progress</h2>
+              <h2>In Progress</h2>
               <Table
                 size="large"
                 dataSource={tableData.inProgressTasks}
                 columns={columns}
                 pagination={false}
-                style={{ marginBottom: "20px" }}
               />
             </Col>
             <Col span={8}>
-              <h2 style={{ fontSize: "17px" }}>Done</h2>
+              <h2>Done</h2>
               <Table
                 size="large"
                 dataSource={tableData.doneTasks}
                 columns={columns}
                 pagination={false}
-                style={{ marginBottom: "20px" }}
               />
             </Col>
           </ConfigProvider>

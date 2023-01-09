@@ -19,11 +19,7 @@ export default function Progress({ sprints }: Props) {
   return (
     <PageLayout>
       <div style={{ marginTop: "40px" }}>
-        <h1
-          style={{ marginTop: "30px", fontSize: "21px", marginBottom: "13px" }}
-        >
-          My Sprints
-        </h1>
+        <h1 style={{ marginTop: "30px", marginBottom: "13px" }}>My Sprints</h1>
 
         <ConfigProvider renderEmpty={displayEmptyList}>
           {/* grid attribute in List component determines how many boxes (Card components) should appear in a row 
