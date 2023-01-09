@@ -48,7 +48,8 @@ export default function Home({ projects, sprints }: Props) {
 
   // runs when projects are refetched, using the status of each task and whether its been added into sprint...
   // ...it stores these tasks in arrays to be used
-  const taskData = useMemo(() => {
+  const sprintData = useMemo(() => {
+    let allTasks: ITask[] = [];
     let todoTasks: IListData[] = [];
     let inProgressTasks: IListData[] = [];
     let doneTasks: IListData[] = [];
@@ -56,23 +57,24 @@ export default function Home({ projects, sprints }: Props) {
     projects.forEach((project) => {
       project.tasks?.forEach((task) => {
         if (task.inSprint === true) {
-          const taskData = {
+          allTasks.push(task);
+          const listData = {
             project: { _id: project._id, name: project.name },
             tasks: { ...task },
           };
           if (task.status === "todo") {
-            todoTasks.push(taskData);
+            todoTasks.push(listData);
           }
           if (task.status === "inProgress") {
-            inProgressTasks.push(taskData);
+            inProgressTasks.push(listData);
           }
           if (task.status === "done") {
-            doneTasks.push(taskData);
+            doneTasks.push(listData);
           }
         }
       });
     });
-    return { todoTasks, inProgressTasks, doneTasks };
+    return { todoTasks, inProgressTasks, doneTasks, allTasks };
   }, [projects]);
 
   const onEndSprint = useCallback(
@@ -80,25 +82,15 @@ export default function Home({ projects, sprints }: Props) {
     async (completed: boolean) => {
       const currentSprint = sprints[sprints.length - 1];
 
-      const sprintTasks: ITask[] = [];
-      taskData.todoTasks.forEach((taskObject) => {
-        sprintTasks.push(taskObject.tasks);
-      });
-      taskData.inProgressTasks.forEach((taskObject) => {
-        sprintTasks.push(taskObject.tasks);
-      });
-      taskData.doneTasks.forEach((taskObject) => {
-        sprintTasks.push(taskObject.tasks);
-      });
-
-      currentSprint.tasks = sprintTasks;
+      currentSprint.tasks = sprintData.allTasks;
       currentSprint.completed = completed;
       try {
         await updateSprint(currentSprint._id, currentSprint);
-        currentSprint.completed == true ? setOpenSprintReviewModal(true) : null;
+        setOpenSprintReviewModal(true);
+
         // remove tasks from done list
-        for (const i in taskData.doneTasks) {
-          const taskObject = taskData.doneTasks[i];
+        for (const i in sprintData.doneTasks) {
+          const taskObject = sprintData.doneTasks[i];
           const projectId = taskObject.project._id;
           const taskId = taskObject.tasks._id;
 
@@ -124,12 +116,14 @@ export default function Home({ projects, sprints }: Props) {
         );
       }
     },
-    [projects, router, sprints, taskData]
+    [projects, router, sprints, sprintData]
   );
-  // useEffect determines if there is an ongoing sprint and sets the state accordingly
-  // it also stores the number of days left until the sprint is over under the variable name sprintCountdown
+
+  // useEffect determines if there is an ongoing sprint and sets the state accordingly...
+  // ...it also stores the number of days left until the sprint is over under the variable name sprintCountdown
   useEffect(() => {
     if (sprints.length > 0) {
+      // if there is an ongoing sprint it will always be the last sprint in the array
       const currentSprint = sprints[sprints.length - 1];
       const daysInSprint = 7;
       const todayDate = new Date();
@@ -154,12 +148,19 @@ export default function Home({ projects, sprints }: Props) {
 
       const sprintDaysLeft = daysInSprint - sprintDaysPassed;
 
+      // currentSprint.completed is null by default (for an ongoing sprint)
+      // currentSprint.completed = true <- not ongoing, completed properly (after 7 days)
+      // currentSprint.completed = false <- not ongoing, not completed properly (ended before 7 days)
+
       if (currentSprint.completed == false) {
+        // if the sprint has completed set to false that means it was ended early and is no longer an ongoing sprint
         setSprintInProgress(false);
       } else if (sprintDaysLeft <= 0) {
+        // if the days for the sprint have passed, the sprint is ended automatically
         setSprintInProgress(false);
         onEndSprint(true);
       } else if (sprintDaysLeft > 0) {
+        // if the days for the sprint have not yet passed, the sprint is determined as ongoing
         setSprintInProgress(true);
       }
 
@@ -168,14 +169,15 @@ export default function Home({ projects, sprints }: Props) {
   }, [sprints, onEndSprint]);
 
   const onStartSprint = async () => {
+    // error handeling for starting a new sprint (for the multiple different cases)
     if (sprintInProgress == false) {
       if (
-        taskData.todoTasks.length > 0 ||
-        taskData.inProgressTasks.length > 0
+        sprintData.todoTasks.length > 0 ||
+        sprintData.inProgressTasks.length > 0
       ) {
-        // loading message appears whilst project is being created, once complete user recieves a response message
         const hideMessage = message.loading("Loading..", 0);
         try {
+          // if a sprint is not already in progress and there are tasks either within the todo list or inProgress list
           await addSprint();
           setSprintInProgress(true);
           message.success(
@@ -220,6 +222,7 @@ export default function Home({ projects, sprints }: Props) {
     }
   };
 
+  // runs during an ongoing sprint when the user changes the status of a task using left and right icons
   const changeStatus = async (
     projectId: string,
     taskId: string,
@@ -260,6 +263,7 @@ export default function Home({ projects, sprints }: Props) {
     // FIXME: go to progress
   };
 
+  // displayed when todo table is empty to prompt the user
   const displayEmptyTodoTable = () =>
     !sprintInProgress ? (
       <>
@@ -287,6 +291,8 @@ export default function Home({ projects, sprints }: Props) {
       title: "Task",
       dataIndex: "tasks",
       render: (task: ITask, taskObject: IListData) => {
+        // if a sprint is not in progress only the minus icon is shown to remove the task from the sprint
+        // if a sprint is in progress only the left and right arrows are shown to change the status of a task
         return (
           <>
             {sprintInProgress ? (
@@ -404,7 +410,7 @@ export default function Home({ projects, sprints }: Props) {
               <ConfigProvider renderEmpty={displayEmptyTodoTable}>
                 <Table
                   size="large"
-                  dataSource={taskData.todoTasks}
+                  dataSource={sprintData.todoTasks}
                   columns={columns}
                   pagination={false}
                   style={{ marginBottom: "40px" }}
@@ -420,7 +426,7 @@ export default function Home({ projects, sprints }: Props) {
                 <h2 style={{ fontSize: "17px" }}>In Progress</h2>
                 <Table
                   size="large"
-                  dataSource={taskData.inProgressTasks}
+                  dataSource={sprintData.inProgressTasks}
                   columns={columns}
                   pagination={false}
                   style={{ marginBottom: "20px" }}
@@ -430,7 +436,7 @@ export default function Home({ projects, sprints }: Props) {
                 <h2 style={{ fontSize: "17px" }}>Done</h2>
                 <Table
                   size="large"
-                  dataSource={taskData.doneTasks}
+                  dataSource={sprintData.doneTasks}
                   columns={columns}
                   pagination={false}
                   style={{ marginBottom: "20px" }}
