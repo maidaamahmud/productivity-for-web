@@ -19,6 +19,7 @@ import {
   ClockCircleOutlined,
   LeftOutlined,
   RightOutlined,
+  ExclamationCircleOutlined,
 } from "@ant-design/icons";
 
 import PageLayout from "../components/general/PageLayout";
@@ -336,31 +337,31 @@ export default function Home({ projects, sprints }: Props) {
         {sprintInProgress ? (
           <Row>
             <Col span={8}>
-              <Popconfirm
-                icon={<></>}
-                key="delete"
-                title="Are you sure you would like to end this sprint early?"
-                onConfirm={() => {
-                  onEndSprint(false);
+              <Button
+                size="large"
+                type="default"
+                style={{
+                  marginBottom: "35px",
+                  backgroundColor: "red",
+                  color: "white",
+                  border: "none",
                 }}
-                onCancel={() => {}}
-                okText="End"
-                okType={"danger"}
-                cancelText="No"
+                onClick={() => {
+                  Modal.confirm({
+                    title: "Confirm",
+                    icon: <></>,
+                    content:
+                      "Are you sure you would like to end this sprint early?",
+                    onOk: () => {
+                      onEndSprint(false);
+                    },
+                    okText: "End",
+                    cancelText: "No",
+                  });
+                }}
               >
-                <Button
-                  size="large"
-                  type="default"
-                  style={{
-                    marginBottom: "35px",
-                    backgroundColor: "red",
-                    color: "white",
-                    border: "none",
-                  }}
-                >
-                  End Sprint
-                </Button>
-              </Popconfirm>
+                End Sprint
+              </Button>
             </Col>
             <Col span={8} offset={8}>
               <h3

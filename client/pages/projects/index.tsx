@@ -14,6 +14,7 @@ import {
   ConfigProvider,
   Popconfirm,
   Tooltip,
+  Modal,
 } from "antd";
 import {
   DeleteOutlined,
@@ -144,23 +145,26 @@ export default function Projects({ projects }: Props) {
                       <EyeOutlined />
                       View
                     </Space>,
-                    <Popconfirm
-                      icon={<></>}
+
+                    <Space
                       key="delete"
-                      title="Are you sure you would like to delete this project?"
-                      onConfirm={() => {
-                        onDeleteProject(project._id);
+                      onClick={() => {
+                        Modal.confirm({
+                          title: "Confirm",
+                          icon: <></>,
+                          content:
+                            "Are you sure you would like to delete this project?",
+                          onOk: () => {
+                            onDeleteProject(project._id);
+                          },
+                          okText: "Delete",
+                          cancelText: "Cancel",
+                        });
                       }}
-                      onCancel={() => {}}
-                      okText="Delete"
-                      okType={"danger"}
-                      cancelText="No"
                     >
-                      <Space key="delete">
-                        <DeleteOutlined key="delete" />
-                        Delete
-                      </Space>
-                    </Popconfirm>,
+                      <DeleteOutlined key="delete" />
+                      Delete
+                    </Space>,
                   ]}
                 >
                   <div style={{ display: "flex", justifyContent: "center" }}>
