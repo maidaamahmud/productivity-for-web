@@ -185,7 +185,6 @@ export default function Projects({ projects }: Props) {
                       <EyeOutlined />
                       View
                     </Space>,
-
                     <Space
                       key="delete"
                       onClick={() => {

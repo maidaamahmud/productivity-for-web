@@ -80,7 +80,7 @@ export default function Home({ projects, sprints }: Props) {
   const onEndSprint = useCallback(
     // UseCallback used to memoize
     async (completed: boolean) => {
-      const currentSprint = sprints[sprints.length - 1];
+      const currentSprint = sprints[0];
 
       currentSprint.tasks = sprintData.allTasks;
       currentSprint.completed = completed;
@@ -123,8 +123,8 @@ export default function Home({ projects, sprints }: Props) {
   // ...it also stores the number of days left until the sprint is over under the variable name sprintCountdown
   useEffect(() => {
     if (sprints.length > 0) {
-      // if there is an ongoing sprint it will always be the last sprint in the array
-      const currentSprint = sprints[sprints.length - 1];
+      // if there is an ongoing sprint it will always be the first sprit in the array ( as the array is ordered descending date)
+      const currentSprint = sprints[0];
       const daysInSprint = 7;
       const todayDate = new Date();
       const sprintStartDate = new Date(currentSprint.createdAt!);

@@ -5,7 +5,8 @@ import { Project, Task } from "../../models/project";
 const getProjects = async (req: Request, res: Response): Promise<void> => {
   try {
     const projects: IProject[] = await Project.find();
-    res.status(200).json({ projects });
+    const projectsOrdered = projects.reverse();
+    res.status(200).json({ projects: projectsOrdered });
   } catch (error) {
     throw error;
   }

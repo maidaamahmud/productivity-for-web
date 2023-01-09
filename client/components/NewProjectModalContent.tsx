@@ -62,7 +62,7 @@ export default function NewProjectModalContent() {
                     <InputNumber min={1} max={8} size={"large"} />
                   </Form.Item>
                   <MinusCircleFilled
-                    style={{ color: "#108ee9" }}
+                    style={{ color: "#b3b3b3" }}
                     onClick={() => remove(name)}
                   />
                 </Space>
