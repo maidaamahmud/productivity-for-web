@@ -42,7 +42,8 @@ export default function Home({ projects, sprints }: Props) {
   const router = useRouter();
 
   const [sprintInProgress, setSprintInProgress] = useState<boolean>(false);
-  const [openSprintReviewModal, setOpenSprintReviewModal] = useState(false);
+  const [openSprintReviewModal, setOpenSprintReviewModal] =
+    useState<boolean>(false);
 
   const sprintCountdown = useRef<number | null>(null);
 
@@ -223,7 +224,7 @@ export default function Home({ projects, sprints }: Props) {
   };
 
   // runs during an ongoing sprint when the user changes the status of a task using left and right icons
-  const changeStatus = async (
+  const onChangeStatus = async (
     projectId: string,
     taskId: string,
     direction: string
@@ -300,13 +301,13 @@ export default function Home({ projects, sprints }: Props) {
                 <CaretLeftFilled
                   style={{ color: "#a3a2a2", fontSize: "17px" }}
                   onClick={() => {
-                    changeStatus(taskObject.project._id, task._id, "left");
+                    onChangeStatus(taskObject.project._id, task._id, "left");
                   }}
                 />
                 <CaretRightFilled
                   style={{ color: "#a3a2a2", fontSize: "17px" }}
                   onClick={() => {
-                    changeStatus(taskObject.project._id, task._id, "right");
+                    onChangeStatus(taskObject.project._id, task._id, "right");
                   }}
                 />
               </>

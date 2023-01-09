@@ -12,6 +12,17 @@ const getSprints = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
+const getSprint = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const selectedSprint: ISprint | null = await Sprint.findById(req.params.id);
+    res.status(200).json({
+      sprint: selectedSprint,
+    });
+  } catch (error) {
+    throw error;
+  }
+};
+
 const addSprint = async (req: Request, res: Response): Promise<void> => {
   try {
     const sprint: ISprint = new Sprint({
@@ -47,4 +58,4 @@ const updateSprint = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
-export { getSprints, addSprint, updateSprint };
+export { getSprints, getSprint, addSprint, updateSprint };

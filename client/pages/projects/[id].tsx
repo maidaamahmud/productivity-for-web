@@ -34,7 +34,7 @@ interface Props {
   project: IProject;
 }
 
-export default function ViewProjectTasks({ project }: Props) {
+export default function ViewProject({ project }: Props) {
   const router = useRouter();
 
   const [openNewTaskModal, setOpenNewTaskModal] = useState<boolean>(false);

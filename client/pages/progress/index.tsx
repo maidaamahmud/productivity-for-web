@@ -1,29 +1,31 @@
 import { Card, ConfigProvider, List } from "antd";
 import axios from "axios";
 import { GetStaticProps } from "next";
-import PageLayout from "../components/general/PageLayout";
-import { ISprint } from "../type";
+import { useRouter } from "next/router";
+import { useState } from "react";
+import PageLayout from "../../components/general/PageLayout";
+import { ISprint } from "../../type";
 
 interface Props {
   sprints: ISprint[];
 }
 export default function Progress({ sprints }: Props) {
-  const displayEmptyList = () => (
-    <>
-      <h2 style={{ textAlign: "center", fontSize: "15px", fontWeight: "500" }}>
-        You have no projects at the moment <br /> Create a new project to start
-        exploring all our features FIXME: fix text
-      </h2>
-    </>
-  );
+  const router = useRouter();
+
+  const displayReadableDate = (date: string | undefined) => {
+    if (date) {
+      const sprintStartDate = new Date(date);
+      return sprintStartDate.toDateString();
+    }
+  };
+
+  const displayEmptyList = () => <h2 style={{ textAlign: "center" }}></h2>;
+
   return (
     <PageLayout>
       <div style={{ marginTop: "40px" }}>
-        <h1 style={{ marginTop: "30px", marginBottom: "13px" }}>My Sprints</h1>
-
+        <h1 style={{ marginTop: "30px", marginBottom: "35px" }}>My Sprints</h1>
         <ConfigProvider renderEmpty={displayEmptyList}>
-          {/* grid attribute in List component determines how many boxes (Card components) should appear in a row 
-          depending on the screen size*/}
           <List
             grid={{
               gutter: 5,
@@ -37,9 +39,15 @@ export default function Progress({ sprints }: Props) {
             dataSource={sprints}
             renderItem={(sprint) => (
               <List.Item>
-                <Card title={"sprint"}>
+                <Card
+                  style={{ cursor: "pointer" }}
+                  title={`Sprint ${sprints.length - sprints.indexOf(sprint)}`}
+                  onClick={() => {
+                    router.push("/progress/" + sprint._id);
+                  }}
+                >
                   <div style={{ display: "flex", justifyContent: "center" }}>
-                    content
+                    <b>{displayReadableDate(sprint.createdAt)}</b>
                   </div>
                 </Card>
               </List.Item>

@@ -119,12 +119,10 @@ export default function Projects({ projects }: Props) {
   };
 
   const displayEmptyList = () => (
-    <>
-      <h3 style={{ textAlign: "center" }}>
-        You have no projects at the moment <br /> Create a new project to start
-        exploring all our features
-      </h3>
-    </>
+    <h3 style={{ textAlign: "center" }}>
+      You have no projects at the moment <br /> Create a new project to start
+      exploring all our features
+    </h3>
   );
 
   return (
