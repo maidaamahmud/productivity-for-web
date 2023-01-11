@@ -32,7 +32,7 @@ const items: MenuItem[] = [
   getItem("Progress", "/progress", <ProjectOutlined />),
 ];
 
-const Sidebar: React.FC = () => {
+export function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const router = useRouter();
 
@@ -65,6 +65,6 @@ const Sidebar: React.FC = () => {
       />
     </Sider>
   );
-};
+}
 
 export default Sidebar;

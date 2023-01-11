@@ -195,6 +195,7 @@ export default function Projects({ projects }: Props) {
                             onDeleteProject(project._id);
                           },
                           okText: "Delete",
+                          okType: "danger",
                           cancelText: "Cancel",
                         });
                       }}

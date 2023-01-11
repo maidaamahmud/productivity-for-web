@@ -1,5 +1,5 @@
 import { Button, Form, Input, InputNumber, Space } from "antd";
-import { MinusCircleFilled } from "@ant-design/icons";
+import { MinusCircleOutlined } from "@ant-design/icons";
 const { TextArea } = Input;
 
 export default function NewProjectModalContent() {
@@ -61,7 +61,7 @@ export default function NewProjectModalContent() {
                   >
                     <InputNumber min={1} max={8} size={"large"} />
                   </Form.Item>
-                  <MinusCircleFilled
+                  <MinusCircleOutlined
                     style={{ color: "#b3b3b3" }}
                     onClick={() => remove(name)}
                   />

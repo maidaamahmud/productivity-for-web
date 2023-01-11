@@ -268,10 +268,10 @@ export default function Home({ projects, sprints }: Props) {
   const displayEmptyTodoTable = () =>
     !sprintInProgress ? (
       <>
-        <h4>
+        <h5>
           Go through your projects and add in what tasks you want to complete in
           your next sprint
-        </h4>
+        </h5>
         <Button
           size="middle"
           type="link"
@@ -366,6 +366,7 @@ export default function Home({ projects, sprints }: Props) {
                       onEndSprint(false);
                     },
                     okText: "End",
+                    okType: "danger",
                     cancelText: "No",
                   });
                 }}
@@ -450,7 +451,7 @@ export default function Home({ projects, sprints }: Props) {
         }}
         footer={null}
       >
-        FIXME: Display some data here (one graph or smth)
+        FIXME: Display some data here
         <div style={{ display: " flex", justifyContent: "flex-end" }}>
           <Button
             size="large"

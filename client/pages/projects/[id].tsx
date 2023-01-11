@@ -107,7 +107,7 @@ export default function ViewProject({ project }: Props) {
 
   const displayEmptyTodoTable = () =>
     project.tasks!.length == 0 ? (
-      <h4>Add tasks to get started on this project</h4>
+      <h5>Add tasks to get started on this project</h5>
     ) : null;
 
   const todoColumns = [
@@ -228,7 +228,7 @@ export default function ViewProject({ project }: Props) {
       </Space>
 
       <h1 style={{ marginTop: "30px", marginBottom: "8px" }}>
-        {project.name} overview
+        {project.name} Overview
       </h1>
 
       <div>
