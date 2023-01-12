@@ -1,11 +1,11 @@
-import React from "react";
+import React, { ReactNode } from "react";
 import Sidebar from "../Sidebar";
 
 import { Layout } from "antd";
 const { Content, Header } = Layout;
 
 interface Props {
-  children: any; //FIXME: ADD TYPE
+  children: ReactNode;
 }
 const PageLayout = ({ children }: Props) => {
   return (

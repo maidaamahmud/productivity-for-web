@@ -47,7 +47,7 @@ export default function Home({ projects, sprints }: Props) {
   const [sprintCountdown, setSprintCountdown] = useState<number>(7);
 
   // runs when projects are refetched, using the status of each task and whether its been added into sprint...
-  // ...it stores these tasks in arrays to be used
+  // ...it stores these tasks in arrays
   const sprintData = useMemo(() => {
     let allTasks: ITask[] = [];
     let todoTasks: IListData[] = [];
@@ -83,7 +83,7 @@ export default function Home({ projects, sprints }: Props) {
       const currentSprint = sprints[0];
 
       currentSprint.tasks = sprintData.allTasks;
-      currentSprint.completed = completed;
+      currentSprint.completed = completed; // onEndSprint is run with true or false in the paremeter depending on how the sprint was ended
       try {
         await updateSprint(currentSprint._id, currentSprint);
         setOpenSprintReviewModal(true);
@@ -181,7 +181,7 @@ export default function Home({ projects, sprints }: Props) {
           await addSprint();
           setSprintInProgress(true);
           message.success(
-            `The sprint has begun, you have one week to try and complete as many of these tasks as you can!`, //FIXME: display in popup
+            `The sprint has begun, you have one week to try and complete as many of these tasks as you can!`,
             3
           );
           refreshData(router);
@@ -340,7 +340,7 @@ export default function Home({ projects, sprints }: Props) {
   return (
     <PageLayout>
       <div style={{ marginTop: "40px" }}>
-        {sprintInProgress ? (
+        {sprintInProgress ? ( //if sprint is in progress the end sprint button is rendered else the start sprint button rendered
           <Row>
             <Col span={8}>
               <Button
@@ -362,7 +362,7 @@ export default function Home({ projects, sprints }: Props) {
                       </h3>
                     ),
                     onOk: () => {
-                      onEndSprint(false);
+                      onEndSprint(false); // onEndSprint run with false as the sprint was not completed
                     },
                     okText: "End",
                     cancelText: "No",
@@ -449,8 +449,8 @@ export default function Home({ projects, sprints }: Props) {
         footer={null}
       >
         <h1 style={{ color: "#4f4e4e", marginTop: "30px" }}>
-          You can now press the review button to head over the progress bar to
-          review your sprint
+          You can now press the review button to head over to the progress bar
+          where you can review your sprint
         </h1>
         <h6 style={{ marginTop: 0 }}>
           *there you can see all your sprints within My Sprints, as well as an

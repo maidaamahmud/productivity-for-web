@@ -3,6 +3,7 @@ import { MinusCircleOutlined } from "@ant-design/icons";
 const { TextArea } = Input;
 
 export default function NewProjectModalContent() {
+  // this componenet is meant as a child componenet to the FormModal componenet(which already contains the Form tags)
   return (
     <>
       <Form.Item
@@ -12,6 +13,7 @@ export default function NewProjectModalContent() {
       >
         <Input size={"large"} />
       </Form.Item>
+
       <div
         style={{
           background: "#fafafa",

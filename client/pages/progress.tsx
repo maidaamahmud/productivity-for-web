@@ -1,4 +1,4 @@
-import { Card, Col, ConfigProvider, List, Row, Progress } from "antd";
+import { Card, Col, ConfigProvider, List, Row, Progress, Button } from "antd";
 import axios from "axios";
 import { GetStaticProps } from "next";
 import { useRouter } from "next/router";
@@ -6,12 +6,19 @@ import PageLayout from "../components/general/PageLayout";
 import { ISprint, ITask } from "../type";
 import { SprintOverviewChart } from "../components/SprintOverviewChart";
 
+// interface for progress object
+interface IProgress {
+  userRank: number;
+  totalRank: number;
+  totalPercentage: number;
+}
+
 interface Props {
   sprints: ISprint[];
 }
+
 export default function SprintProgress({ sprints }: Props) {
   const router = useRouter();
-
   const displayReadableDate = (date: string | undefined) => {
     if (date) {
       const sprintStartDate = new Date(date);
@@ -19,8 +26,13 @@ export default function SprintProgress({ sprints }: Props) {
     }
   };
 
+  // find progress for sprint passed into function
   const findSprintProgress = (sprintTasks: ITask[]) => {
-    let sprintProgress = { userRank: 0, totalRank: 0, totalPercentage: 0 };
+    let sprintProgress: IProgress = {
+      userRank: 0,
+      totalRank: 0,
+      totalPercentage: 0,
+    };
     if (sprintTasks) {
       sprintTasks.forEach((task) => {
         task.status === "done"
@@ -35,8 +47,13 @@ export default function SprintProgress({ sprints }: Props) {
     return sprintProgress;
   };
 
+  // find average progress for all sprints
   const findAverageProgress = () => {
-    let averageProgress = { userRank: 0, totalRank: 0, totalPercentage: 0 };
+    let averageProgress: IProgress = {
+      userRank: 0,
+      totalRank: 0,
+      totalPercentage: 0,
+    };
     sprints.forEach((sprint) => {
       if (sprint.completed) {
         const result = findSprintProgress(sprint.tasks!);
@@ -50,6 +67,8 @@ export default function SprintProgress({ sprints }: Props) {
     return averageProgress;
   };
 
+  // creates object to be used in sprint overview table(SprintOverviewChart)
+  //with the date sprint was created(to be used as the x-axis) and the percentage of sprint completed for each sprint(y-axis)
   const findAllSprintProgress = () => {
     let allSprintProgress: { date: string; completed: number }[] = [];
     sprints.forEach((sprint) => {
@@ -66,12 +85,32 @@ export default function SprintProgress({ sprints }: Props) {
     return allSprintProgress.reverse();
   };
 
-  const displayEmptyList = () => <h2 style={{ textAlign: "center" }}></h2>;
+  const displayEmptyList = () => (
+    <>
+      <h3 style={{ textAlign: "center" }}>
+        Complete a sprint for it to appear here <br />
+        You can start one by going to the home page
+      </h3>
+      <Button
+        size="middle"
+        type="link"
+        style={{
+          color: "#108ee9",
+        }}
+        onClick={() => {
+          router.push("/");
+        }}
+      >
+        Go to Home
+      </Button>
+    </>
+  );
 
   return (
     <PageLayout>
       <div style={{ marginTop: "40px" }}>
         <h1 style={{ marginTop: "30px", marginBottom: 0 }}>Sprints Overview</h1>
+
         <Row>
           <Col span={8}>
             <h6 style={{ marginBottom: "35px", marginTop: "10px" }}>
@@ -81,17 +120,24 @@ export default function SprintProgress({ sprints }: Props) {
           <Col span={8} offset={8}>
             <h2 style={{ textAlign: "right", padding: 0, margin: 0 }}>
               <span style={{ color: "#fa4141" }}>
-                {findAverageProgress().totalPercentage}%
+                {sprints.length > 0 ? (
+                  <>{findAverageProgress().totalPercentage}%</>
+                ) : (
+                  <>0%</>
+                )}
               </span>{" "}
               completed on average
             </h2>
           </Col>
         </Row>
+
         <SprintOverviewChart data={findAllSprintProgress()} />
+
         <h1 style={{ marginTop: "30px", marginBottom: 0 }}>My Sprints</h1>
         <h6 style={{ marginBottom: "35px", marginTop: "10px" }}>
           *Sprints that were ended early are marked with red
         </h6>
+
         <ConfigProvider renderEmpty={displayEmptyList}>
           <List
             grid={{
@@ -151,7 +197,7 @@ export const getServerSideProps: GetStaticProps = async () => {
   const BASE_URL: string = "http://127.0.0.1:4000";
   const sprintsRes = await axios.get(BASE_URL + "/sprints");
   const sprints = sprintsRes.data.sprints;
-  sprints[0]?.completed === null ? sprints.shift() : null;
+  sprints[0]?.completed === null ? sprints.shift() : null; // removes the first sprint if it is still ongoing
 
   return {
     props: {

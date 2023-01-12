@@ -9,7 +9,6 @@ import {
   Form,
   Input,
   InputNumber,
-  Typography,
   Tooltip,
 } from "antd";
 import {
@@ -28,7 +27,6 @@ import { refreshData } from "../../utils/globalFunctions";
 import FormModal from "../../components/general/FormModal";
 
 const { TextArea } = Input;
-const { Text } = Typography;
 
 interface Props {
   project: IProject;
@@ -110,12 +108,13 @@ export default function ViewProject({ project }: Props) {
       <h5>Add tasks to get started on this project</h5>
     ) : null;
 
+  // column layout for the todo column
   const todoColumns = [
     {
       title: (
         <div style={{ display: "flex", justifyContent: "space-between" }}>
           Tasks
-          <Button
+          <Button // add task button
             size="small"
             type="default"
             onClick={() => {
@@ -135,9 +134,9 @@ export default function ViewProject({ project }: Props) {
       render: (description: string, task: ITask) => {
         return (
           <Space size={"small"}>
-            {!task.inSprint ? (
+            {!task.inSprint ? ( // if task is not already in sprint add sprint button is rendered
               <Tooltip title="add to sprint">
-                <PlusCircleFilled
+                <PlusCircleFilled // add sprint button
                   style={{ color: "#108ee9" }}
                   onClick={() => {
                     onAddToSprint(task._id);
@@ -163,7 +162,7 @@ export default function ViewProject({ project }: Props) {
             </Col>
             <Col span={6} offset={6}>
               <Tooltip title="delete task">
-                <DeleteFilled
+                <DeleteFilled // delete task button
                   style={{ color: "#a3a2a2" }}
                   onClick={() => {
                     onDeleteTask(task._id);
@@ -178,6 +177,7 @@ export default function ViewProject({ project }: Props) {
     },
   ];
 
+  // column layout for the inProgress and done columns
   const columns = [
     {
       title: "tasks",
@@ -195,7 +195,7 @@ export default function ViewProject({ project }: Props) {
             </Col>
             <Col span={6} offset={6}>
               <Tooltip title="delete task">
-                <DeleteFilled
+                <DeleteFilled // delete task button
                   style={{ color: "#a3a2a2" }}
                   onClick={() => {
                     onDeleteTask(task._id);
@@ -270,6 +270,7 @@ export default function ViewProject({ project }: Props) {
           </ConfigProvider>
         </Row>
 
+        {/* form modal to add new task */}
         <FormModal
           isOpen={openNewTaskModal}
           onCancel={onCancelNewTaskModal}

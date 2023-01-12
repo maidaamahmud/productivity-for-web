@@ -5,7 +5,7 @@ import { ReactNode } from "react";
 // componenet renders a form in a modal and handles client-side form validation
 // children should contain form input fields
 interface Props {
-  children: any;
+  children: ReactNode;
   isOpen: boolean;
   onOk: any;
   onCancel: any;
@@ -29,13 +29,14 @@ export default function FormModal({
     form
       .validateFields()
       .then((values) => {
-        onOk(values);
+        onOk(values); // onOk function is provided the values of the form
         form.resetFields();
       })
       .catch((info) => {
-        console.log("Validate Failed:", info);
+        console.log("Validation Failed");
       });
   };
+
   return (
     <Modal
       title={title}

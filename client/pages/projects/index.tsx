@@ -12,11 +12,8 @@ import {
   Space,
   Progress,
   ConfigProvider,
-  Popconfirm,
   Tooltip,
   Modal,
-  Row,
-  Col,
   Form,
   Input,
 } from "antd";
@@ -32,7 +29,7 @@ import FormModal from "../../components/general/FormModal";
 import NewProjectModalContent from "../../components/NewProjectModalContent";
 
 interface Props {
-  projects: IProject[]; // comes from getServerSideProps (at bottom of page)
+  projects: IProject[];
 }
 
 export default function Projects({ projects }: Props) {
@@ -82,10 +79,13 @@ export default function Projects({ projects }: Props) {
   };
 
   const onEditProjectName = async (values: { name: string }) => {
+    // values is the values of the form fields within the modal
     if (editProjectId) {
+      // find index of project (project being edited has its ID stored in state under the name editProjectId)
       const projectIndex = projects.findIndex(
         (project) => project._id === editProjectId
       );
+      // change the name of project to the name entered within the form
       projects[projectIndex].name = values.name;
       try {
         await updateProject(editProjectId, projects[projectIndex]);
@@ -104,6 +104,7 @@ export default function Projects({ projects }: Props) {
     setOpenEditNameModal(false);
   };
 
+  // find progress (ranking (score) of tasks completed / ranking of tasks inProgress + ranking of tasks todo)
   const findProjectProgress = (projectTasks?: ITask[]): number => {
     let progressPercentage = 0;
     if (projectTasks) {
@@ -223,6 +224,9 @@ export default function Projects({ projects }: Props) {
           />
         </ConfigProvider>
 
+        {/* FormModal is a general componenet created to be re-used whenever a modal containing a form is needed  */}
+        {/* modals are rendered depending on state */}
+        {/* This modal is for creating a project */}
         <FormModal
           isOpen={openNewProjectModal}
           onCancel={onCancelNewProjectModal}
@@ -249,6 +253,7 @@ export default function Projects({ projects }: Props) {
           <NewProjectModalContent />
         </FormModal>
 
+        {/* This modal is for changing project name */}
         <FormModal
           isOpen={openEditNameModal}
           onCancel={onCancelEditNameModal}

@@ -156,6 +156,7 @@ export function SprintOverviewChart({ data }: Props) {
     },
     tooltip: {
       customContent: (title: string, items: any) => {
+        // items[0].value is the y-axis value for the item(point) being hovered on
         return (
           <div>
             <h3>{title}</h3>
