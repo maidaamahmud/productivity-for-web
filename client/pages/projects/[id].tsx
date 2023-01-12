@@ -233,7 +233,7 @@ export default function ViewProject({ project }: Props) {
 
       <div>
         <Row gutter={[16, 16]}>
-          <Col span={8}>
+          <Col lg={{ span: 8 }} sm={{ span: 24 }} xs={{ span: 24 }}>
             <h2>Todo</h2>
             <ConfigProvider renderEmpty={displayEmptyTodoTable}>
               <Table
@@ -249,7 +249,7 @@ export default function ViewProject({ project }: Props) {
               return "";
             }}
           >
-            <Col span={8}>
+            <Col lg={{ span: 8 }} sm={{ span: 24 }} xs={{ span: 24 }}>
               <h2>In Progress</h2>
               <Table
                 size="large"
@@ -258,7 +258,7 @@ export default function ViewProject({ project }: Props) {
                 pagination={false}
               />
             </Col>
-            <Col span={8}>
+            <Col lg={{ span: 8 }} sm={{ span: 24 }} xs={{ span: 24 }}>
               <h2>Done</h2>
               <Table
                 size="large"

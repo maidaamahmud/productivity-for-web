@@ -187,15 +187,18 @@ export default function Projects({ projects }: Props) {
                       key="delete"
                       onClick={() => {
                         Modal.confirm({
-                          title: "Confirm",
+                          title: "Confirmation",
                           icon: <></>,
-                          content:
-                            "Are you sure you would like to delete this project?",
+                          content: (
+                            <h3 style={{ marginTop: 0, color: "#4f4e4e" }}>
+                              Are you sure you would like to delete this
+                              project?
+                            </h3>
+                          ),
                           onOk: () => {
                             onDeleteProject(project._id);
                           },
                           okText: "Delete",
-                          okType: "danger",
                           cancelText: "Cancel",
                         });
                       }}

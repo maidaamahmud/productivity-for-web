@@ -258,11 +258,6 @@ export default function Home({ projects, sprints }: Props) {
     }
   };
 
-  const onReviewSprint = () => {
-    setOpenSprintReviewModal(false);
-    // FIXME: go to progress
-  };
-
   // displayed when todo table is empty to prompt the user
   const displayEmptyTodoTable = () =>
     !sprintInProgress ? (
@@ -357,15 +352,17 @@ export default function Home({ projects, sprints }: Props) {
                 }}
                 onClick={() => {
                   Modal.confirm({
-                    title: "Confirm",
+                    title: "Confirmation",
                     icon: <></>,
-                    content:
-                      "Are you sure you would like to end this sprint early?",
+                    content: (
+                      <h3 style={{ marginTop: 0, color: "#4f4e4e" }}>
+                        Are you sure you would like to end this sprint early?
+                      </h3>
+                    ),
                     onOk: () => {
                       onEndSprint(false);
                     },
                     okText: "End",
-                    okType: "danger",
                     cancelText: "No",
                   });
                 }}
@@ -404,7 +401,7 @@ export default function Home({ projects, sprints }: Props) {
         )}
         <div>
           <Row gutter={[16, 16]}>
-            <Col span={8}>
+            <Col lg={{ span: 8 }} sm={{ span: 24 }} xs={{ span: 24 }}>
               <h2>Todo</h2>
               <ConfigProvider renderEmpty={displayEmptyTodoTable}>
                 <Table
@@ -420,7 +417,7 @@ export default function Home({ projects, sprints }: Props) {
                 return "";
               }}
             >
-              <Col span={8}>
+              <Col lg={{ span: 8 }} sm={{ span: 24 }} xs={{ span: 24 }}>
                 <h2>In Progress</h2>
                 <Table
                   size="large"
@@ -429,7 +426,7 @@ export default function Home({ projects, sprints }: Props) {
                   pagination={false}
                 />
               </Col>
-              <Col span={8}>
+              <Col lg={{ span: 8 }} sm={{ span: 24 }} xs={{ span: 24 }}>
                 <h2>Done</h2>
                 <Table
                   size="large"
@@ -443,14 +440,20 @@ export default function Home({ projects, sprints }: Props) {
         </div>
       </div>
       <Modal
-        title="Review Your Sprint"
         open={openSprintReviewModal}
         onCancel={() => {
           setOpenSprintReviewModal(false);
         }}
         footer={null}
       >
-        FIXME: Display some data here
+        <h1 style={{ color: "#4f4e4e", marginTop: "30px" }}>
+          You can now press the review button to head over the progress bar to
+          review your sprint
+        </h1>
+        <h6 style={{ marginTop: 0 }}>
+          *there you can see all your sprints within My Sprints, as well as an
+          overall sprint review right at the top of the page!
+        </h6>
         <div style={{ display: " flex", justifyContent: "flex-end" }}>
           <Button
             size="large"
@@ -461,7 +464,10 @@ export default function Home({ projects, sprints }: Props) {
               width: "10vh",
               border: "none",
             }}
-            onClick={onReviewSprint}
+            onClick={() => {
+              setOpenSprintReviewModal(false);
+              router.push("/progress");
+            }}
           >
             Review
           </Button>
