@@ -7,33 +7,7 @@ interface Props {
   data: { date: string; completed: number }[];
 }
 
-export function SprintOverviewChart({}: Props) {
-  const data = [
-    {
-      date: "Jun 12 2022",
-      completed: 55,
-    },
-    {
-      date: "Jun 13 2022",
-      completed: 45,
-    },
-    {
-      date: "Jun 30 2022",
-      completed: 100,
-    },
-    {
-      date: "Jul 1 2022",
-      completed: 0,
-    },
-    {
-      date: "Jul 20 2022",
-      completed: 80,
-    },
-    {
-      date: "Jul 20 2022",
-      completed: 80,
-    },
-  ];
+export function SprintOverviewChart({ data }: Props) {
   const { InteractionAction, registerInteraction, registerAction } = G2;
 
   G2.registerShape("point", "custom-point", {

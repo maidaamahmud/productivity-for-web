@@ -1,4 +1,4 @@
-import { Card, Col, ConfigProvider, List, Modal, Row } from "antd";
+import { Card, Col, ConfigProvider, List, Row, Progress } from "antd";
 import axios from "axios";
 import { GetStaticProps } from "next";
 import { useRouter } from "next/router";
@@ -9,7 +9,7 @@ import { SprintOverviewChart } from "../components/SprintOverviewChart";
 interface Props {
   sprints: ISprint[];
 }
-export default function Progress({ sprints }: Props) {
+export default function SprintProgress({ sprints }: Props) {
   const router = useRouter();
 
   const displayReadableDate = (date: string | undefined) => {
@@ -38,11 +38,11 @@ export default function Progress({ sprints }: Props) {
   const findAverageProgress = () => {
     let averageProgress = { userRank: 0, totalRank: 0, totalPercentage: 0 };
     sprints.forEach((sprint) => {
-      // if (sprint.completed) {
-      const result = findSprintProgress(sprint.tasks!);
-      averageProgress.userRank += result.userRank;
-      averageProgress.totalRank += result.totalRank;
-      // }
+      if (sprint.completed) {
+        const result = findSprintProgress(sprint.tasks!);
+        averageProgress.userRank += result.userRank;
+        averageProgress.totalRank += result.totalRank;
+      }
     });
     averageProgress.totalPercentage = Math.round(
       (averageProgress.userRank / averageProgress.totalRank) * 100
@@ -53,26 +53,17 @@ export default function Progress({ sprints }: Props) {
   const findAllSprintProgress = () => {
     let allSprintProgress: { date: string; completed: number }[] = [];
     sprints.forEach((sprint) => {
-      // if (sprint.completed) {
-      const result = findSprintProgress(sprint.tasks!);
-      let sprintProgress = { date: "", completed: 0 };
-      sprintProgress.completed = result.totalPercentage
-        ? result.totalPercentage
-        : 0;
-      sprintProgress.date = displayReadableDate(sprint.createdAt)!.slice(4);
-      allSprintProgress.push(sprintProgress);
-      // }
+      if (sprint.completed) {
+        const result = findSprintProgress(sprint.tasks!);
+        let sprintProgress = { date: "", completed: 0 };
+        sprintProgress.completed = result.totalPercentage
+          ? result.totalPercentage
+          : 0;
+        sprintProgress.date = displayReadableDate(sprint.createdAt)!.slice(4);
+        allSprintProgress.push(sprintProgress);
+      }
     });
-    return allSprintProgress;
-  };
-
-  const onOpenReviewSprint = (sprintId: string, sprintNumber: number) => {
-    Modal.info({
-      title: `Overview for Sprint ${sprintNumber}`,
-      content: <div></div>,
-      icon: <></>,
-      width: 700,
-    });
+    return allSprintProgress.reverse();
   };
 
   const displayEmptyList = () => <h2 style={{ textAlign: "center" }}></h2>;
@@ -80,11 +71,27 @@ export default function Progress({ sprints }: Props) {
   return (
     <PageLayout>
       <div style={{ marginTop: "40px" }}>
-        <h1 style={{ marginTop: "30px", marginBottom: "35px" }}>
-          Sprints Overview
-        </h1>
+        <h1 style={{ marginTop: "30px", marginBottom: 0 }}>Sprints Overview</h1>
+        <Row>
+          <Col span={8}>
+            <h6 style={{ marginBottom: "35px", marginTop: "10px" }}>
+              *Sprints that were ended early are not included in this overview
+            </h6>
+          </Col>
+          <Col span={8} offset={8}>
+            <h2 style={{ textAlign: "right", padding: 0, margin: 0 }}>
+              <span style={{ color: "#fa4141" }}>
+                {findAverageProgress().totalPercentage}%
+              </span>{" "}
+              completed on average
+            </h2>
+          </Col>
+        </Row>
         <SprintOverviewChart data={findAllSprintProgress()} />
-        <h1 style={{ marginTop: "30px", marginBottom: "35px" }}>My Sprints</h1>
+        <h1 style={{ marginTop: "30px", marginBottom: 0 }}>My Sprints</h1>
+        <h6 style={{ marginBottom: "35px", marginTop: "10px" }}>
+          *Sprints that were ended early are marked with red
+        </h6>
         <ConfigProvider renderEmpty={displayEmptyList}>
           <List
             grid={{
@@ -100,32 +107,35 @@ export default function Progress({ sprints }: Props) {
             renderItem={(sprint) => (
               <List.Item>
                 <Card
-                  style={{ cursor: "pointer" }}
                   title={
                     <Row>
                       <Col span={8}>
                         {`Sprint ${sprints.length - sprints.indexOf(sprint)}`}
                       </Col>
                       <Col span={8} offset={8}>
-                        <div style={{ color: "#108ee9", fontWeight: 500 }}>
+                        <div
+                          style={{
+                            color: sprint.completed ? "#108ee9" : "#fa4141",
+                            fontWeight: 500,
+                          }}
+                        >
                           <>{displayReadableDate(sprint.createdAt)?.slice(4)}</>
                         </div>
                       </Col>
                     </Row>
                   }
-                  onClick={() => {
-                    onOpenReviewSprint(
-                      sprint._id,
-                      sprints.length - sprints.indexOf(sprint)
-                    );
-                  }}
                 >
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "center",
-                    }}
-                  ></div>
+                  <div style={{ display: "flex", justifyContent: "center" }}>
+                    <Progress
+                      type="circle"
+                      width={65}
+                      strokeColor={{ "0%": "#108ee9", "100%": "#87d068" }}
+                      strokeWidth={8}
+                      percent={
+                        findSprintProgress(sprint.tasks!).totalPercentage
+                      }
+                    />
+                  </div>
                 </Card>
               </List.Item>
             )}
