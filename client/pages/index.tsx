@@ -44,8 +44,7 @@ export default function Home({ projects, sprints }: Props) {
   const [sprintInProgress, setSprintInProgress] = useState<boolean>(false);
   const [openSprintReviewModal, setOpenSprintReviewModal] =
     useState<boolean>(false);
-
-  const sprintCountdown = useRef<number | null>(null);
+  const [sprintCountdown, setSprintCountdown] = useState<number>(7);
 
   // runs when projects are refetched, using the status of each task and whether its been added into sprint...
   // ...it stores these tasks in arrays to be used
@@ -156,7 +155,7 @@ export default function Home({ projects, sprints }: Props) {
       if (currentSprint.completed == false) {
         // if the sprint has completed set to false that means it was ended early and is no longer an ongoing sprint
         setSprintInProgress(false);
-      } else if (sprintDaysLeft <= 0) {
+      } else if (sprintDaysLeft <= 0 && currentSprint.completed == null) {
         // if the days for the sprint have passed, the sprint is ended automatically
         setSprintInProgress(false);
         onEndSprint(true);
@@ -165,7 +164,7 @@ export default function Home({ projects, sprints }: Props) {
         setSprintInProgress(true);
       }
 
-      sprintCountdown.current = sprintDaysLeft;
+      setSprintCountdown(sprintDaysLeft);
     }
   }, [sprints, onEndSprint]);
 
@@ -382,7 +381,7 @@ export default function Home({ projects, sprints }: Props) {
               >
                 <ClockCircleOutlined />
                 &nbsp;&nbsp;
-                {`${sprintCountdown.current} days`}
+                {`${sprintCountdown} days`}
               </h3>
             </Col>
           </Row>

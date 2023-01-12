@@ -4,10 +4,6 @@ import { GetStaticProps } from "next";
 import { useRouter } from "next/router";
 import PageLayout from "../components/general/PageLayout";
 import { ISprint, ITask } from "../type";
-
-import { Line, G2 } from "@ant-design/plots";
-
-import { each, findIndex } from "@antv/util";
 import { SprintOverviewChart } from "../components/SprintOverviewChart";
 
 interface Props {

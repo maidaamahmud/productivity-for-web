@@ -1,6 +1,4 @@
 // @ts-nocheck
-import { useState, useEffect } from "react";
-import ReactDOM from "react-dom";
 import { Line, G2 } from "@ant-design/plots";
 
 import { each, findIndex } from "@antv/util";
@@ -208,5 +206,6 @@ export function SprintOverviewChart({}: Props) {
       },
     ],
   };
+
   return <Line {...config} />;
 }
