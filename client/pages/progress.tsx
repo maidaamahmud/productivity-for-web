@@ -119,7 +119,7 @@ export default function SprintProgress({ sprints }: Props) {
           </Col>
           <Col span={8} offset={8}>
             <h2 style={{ textAlign: "right", padding: 0, margin: 0 }}>
-              <span style={{ color: "#fa4141" }}>
+              <span style={{ color: "#fa4646" }}>
                 {sprints.length > 0 ? (
                   <>{findAverageProgress().totalPercentage}%</>
                 ) : (
@@ -161,7 +161,7 @@ export default function SprintProgress({ sprints }: Props) {
                       <Col span={8} offset={8}>
                         <div
                           style={{
-                            color: sprint.completed ? "#108ee9" : "#fa4141",
+                            color: sprint.completed ? "#108ee9" : "#fa4646",
                             fontWeight: 500,
                           }}
                         >
