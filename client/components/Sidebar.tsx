@@ -36,6 +36,16 @@ export function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const router = useRouter();
 
+  const getPathname = () => {
+    let pathname = router.pathname;
+    // expression below checks if there are 2 forward slashes within the pathname
+    if (pathname.split("/").length - 1 == 2) {
+      // if there is a second forward slash, it takes out all the text before the second forward slash
+      pathname = pathname.substring(0, pathname.lastIndexOf("/"));
+    }
+    // for example if the pathname is '/projects/xyz' the new returned pathname will be '/projects'
+    return pathname;
+  };
   return (
     <Sider
       theme="light"
@@ -55,7 +65,7 @@ export function Sidebar() {
 
       <Menu
         theme="light"
-        defaultSelectedKeys={[router.pathname]}
+        defaultSelectedKeys={[getPathname()]} //default selected value for sidebar
         mode="inline"
         onClick={({ key }) => {
           // directs user to correct path (which is stored under key for each item object within the items array)
