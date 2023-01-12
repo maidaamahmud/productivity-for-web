@@ -318,7 +318,9 @@ export default function Home({ projects, sprints }: Props) {
                 />
               </Tooltip>
             )}
-            &nbsp;&nbsp;
+            &nbsp;
+            <span style={{ fontWeight: 600 }}>{taskObject.project.name}</span>
+            <br />
             {task.description}
           </>
         );
